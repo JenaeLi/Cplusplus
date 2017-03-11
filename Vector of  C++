@@ -1,0 +1,297 @@
+#include<iostream>
+#include<ostream>
+#include<assert.h>
+using namespace std;
+
+
+typedef int DataType;
+class Vector
+{
+public:
+	explicit Vector(size_t capacity = 3)
+		: _capacity(capacity)
+		, _size(0)
+	{
+		_pData = new DataType[_capacity];
+	}
+
+	// 有size个值为data的元素
+	Vector(size_t n, const DataType& data)
+		: _capacity(n)
+		, _size(n)
+	{
+		_pData = new DataType[_capacity];
+		for (size_t idx = 0; idx < _size; ++idx)
+			_pData[idx] = data;
+	}
+
+	Vector(const Vector& v)//拷贝构造函数
+		: _capacity(v._capacity)
+		, _size(v._size)
+	{
+		_pData = new DataType[_capacity];
+		for (size_t idx = 0; idx < _size; ++idx)
+			_pData[idx] = v._pData[idx];
+	}
+
+	Vector& operator=(const Vector& v)
+	{
+		if (this != &v)
+		{
+			_capacity = v._capacity;
+			_size = v._size;
+			DataType* tmp = new DataType[v._capacity];
+			for (size_t idx = 0; idx < _size; ++idx)
+				tmp[idx] = v._pData[idx];
+			delete[]_pData;
+			_pData = tmp;
+		}
+		return *this;
+	}
+
+	~Vector()
+	{
+		if (_pData)
+		{
+			delete[] _pData;
+			_pData = NULL;
+			_capacity = 0;
+			_size = 0;
+		}
+	}
+
+	/////////////////////////////////////
+	void PushBack(const DataType& data)
+	{
+		_CheckCapacity();
+		_pData[_size] = data;
+		_size++;
+	}
+	void PopBack()
+	{
+		if (!Empty())
+			_size--;
+	}
+	void PushFront(const DataType& data)
+	{
+		_CheckCapacity();
+		for (size_t idx = _size; idx > 0; idx--)
+			_pData[idx] = _pData[idx-1];
+		_pData[0] = data;
+		_size++;
+	}
+	void PopFront()
+	{
+		for (size_t idx = 0; idx < _size - 1; idx++)
+		{
+			_pData[idx] = _pData[idx + 1];
+		}
+		_size--;
+	}
+	void Insert(size_t pos, const DataType& data)
+	{
+		if (pos > _size)
+		{
+			return;
+		}
+		_CheckCapacity();
+		for (size_t idx = _size; idx > pos; idx--)
+		{
+			_pData[idx] = _pData[idx - 1];
+		}
+		_pData[pos] = data;
+		_size++;
+	}
+	void Erase(size_t pos)
+	{
+		if (Empty()||pos >= _size)
+		{
+			return;
+		}
+		for (size_t idx = pos; idx < _size-1; idx++)
+		{
+			_pData[idx] = _pData[idx+1];
+		}
+		_size--;
+	}
+	int Find(const DataType& data)const
+	{
+		if (!Empty())
+		{
+			for (size_t idx = 0; idx < _size; ++idx)
+			{
+				if (_pData[idx] == data)
+				{
+					return idx;
+				}
+			}
+			return -1;
+		}
+	}
+	void Clear()
+	{
+		if (_pData)
+		{
+			delete[]_pData;
+			_pData = NULL;
+			_capacity = 0;
+			_size = 0;
+		}
+	}
+	size_t Size()const
+	{
+		return _size;
+	}
+	void ReSize(size_t size, const DataType& data = DataType())
+	{
+		if (_size >= size)
+		{
+			_size = size;
+			if (data)
+			{
+				for (size_t idx = 0; idx < _size; ++idx)
+					_pData[idx] = data;
+			}
+		}
+		else
+		{
+			DataType tmp = _size;
+			_size = size;
+			_CheckCapacity();
+			for (size_t idx = tmp; idx < _size; ++idx)
+				_pData[idx] = data;
+		}
+	}
+	size_t Capacity()const
+	{
+		return _capacity;
+	}
+	bool Empty()const
+	{
+		return 0 == _size;
+	}
+	DataType& Front()
+	{
+		return _pData[0];
+	}
+	const DataType& Front()const
+	{
+		return _pData[0];
+	}
+	DataType& Back()
+	{
+		return _pData[_size - 1];
+	}
+	const DataType& Back()const
+	{
+		return _pData[_size - 1];
+	}
+	void Assign(size_t n, const DataType& data = DataType())
+	{
+		_size = n;
+		_CheckCapacity();
+		for (size_t idx = 0; idx < _size; idx++)
+		{
+			_pData[idx] = data;
+		}
+	}
+	DataType& operator[](size_t index)
+	{
+		assert(index < _size);
+		return _pData[index];
+	}
+	const DataType& operator[](size_t index)const
+	{
+		assert(index < _size);
+		return _pData[index];
+	}
+	DataType& At(size_t index)
+	{
+		assert(index < _size);
+		return _pData[index];
+	}
+	const DataType& At(size_t index)const
+	{
+		assert(index < _size);
+		return _pData[index];
+	}
+
+private:
+	void _CheckCapacity()
+	{
+		if (_size >= _capacity)
+		{
+			DataType *tmp = new DataType[_capacity * 2];
+			_capacity *= 2;
+			for (size_t idx = 0; idx < _size; ++idx)
+			{
+				tmp[idx] = _pData[idx];
+			}
+			delete[] _pData;
+			_pData = tmp;
+		}
+	}
+	friend std::ostream& operator<<(std::ostream& _cout, const Vector& v);
+private:
+	DataType* _pData;
+	size_t _capacity;
+	size_t _size;
+};
+
+std::ostream& operator<<(std::ostream& _cout, const Vector& v)
+{
+	for (size_t idx = 0; idx < v._size; idx++)
+		_cout << v._pData[idx] << "  ";
+	_cout << endl;
+	return _cout;
+}
+
+void FunTest()
+{
+	Vector v1;
+	v1.Erase(2);
+	v1.PushFront(9);
+	v1.PushBack(1);
+	v1.PushBack(2);
+	v1.PushBack(3);
+	v1.Insert(2, 8);
+	v1.PushBack(4);
+	v1.PushBack(5);
+	v1.Erase(2);
+	v1.PushBack(6);
+	//v1.PopFront();
+	//v1.Assign(9, 1);
+	//v1.Assign(5, 1);
+	cout << v1 << endl;
+	cout << v1.At(9) << endl;
+	cout << v1[5] << endl;
+	cout << v1.Back();
+	cout << v1.Front();
+
+	v1.ReSize(5);
+	v1.ReSize(8,10);
+	v1.ReSize(12);
+	//cout<<v1.Size()<<endl;
+	//cout << v1.Capacity() << endl;
+	//cout << v1.Empty() << endl;
+	//v1.Clear();
+	//cout << v1.Empty() << endl;
+
+	//cout <<v1.Find(8)<<endl;
+	//cout<<v1.Find(4)<<endl;
+	Vector v2(1, 4);
+	v1.PopBack();
+	v1.PopBack();
+	v1.PopBack();
+	v1.PopBack();
+	v1.PushBack(7);
+	v2 = v1;
+	Vector v3(5, 10);
+}
+
+int main()
+{
+	FunTest();
+	system("pause");
+	return 0;
+}
