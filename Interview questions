@@ -1,0 +1,494 @@
+void ReversePrint(pList pHead)
+	if (NULL == pHead)
+	{
+		return;
+	}
+	ReversePrint(pHead->next);
+	printf("%d->", pHead->data);
+}
+
+void DeleteNotTailNode(pList pos)
+{
+	if (NULL == pos)
+	{
+		return;
+	}
+	pList pCur = pos->next;
+	pos->data = pCur->data;
+	pos->next = pCur->next;
+	free(pCur);
+	pCur = NULL;
+}
+
+void InsertNotHeadNode(pList pos, DataType data)
+{
+	if (NULL == pos)
+	{
+		return;
+	}
+	pList pCur = BuyNode(data);
+	pCur->next = pos->next;
+	pos->next = pCur;
+	DataType tmp = pos->data;
+	pos->data = pCur->data;
+	pCur->data = tmp;
+}
+
+pList JosephCircle(pList pHead, size_t M)
+{
+	pList pCur = pHead;
+	if (NULL == pHead)
+		return NULL;
+	while (pCur != pCur->next)
+	{
+		size_t count = M;
+		while (--count)
+		{
+			pCur = pCur->next;
+		}
+		pList pDel = pCur->next;
+		pCur->data = pDel->data;
+		pCur->next = pDel->next;
+		free(pDel);
+	}
+	return pCur;
+}
+
+pList Reverse(pList pHead)
+{
+	if (NULL == pHead || NULL == pHead->next)
+	{
+		return pHead;
+	}
+	pList pPre = pHead;
+	pList pCur = pPre->next;
+	pList pNext = pCur->next;
+	while (pCur->next)
+	{
+		pCur->next = pPre;
+		pPre = pCur;
+		pCur = pNext;
+		pNext = pNext->next;
+	}
+	pHead->next = NULL;
+	pCur->next = pPre;
+	return pCur;
+}
+
+pList Reverse_NewNode(pList pHead)
+{
+	if (NULL == pHead || NULL == pHead->next)
+	{
+		return pHead;
+	}
+	pList pCur = pHead;
+	pList NewNode = pCur;
+	while (pCur->next)
+	{
+		pCur = pCur->next;
+		PushFront(&NewNode, pCur->data);
+	}
+	pHead->next = NULL;
+	return NewNode;
+}
+
+void BubbleSortList(pList pHead)
+{
+	if (NULL == pHead || NULL == pHead->next)
+	{}
+	else
+	{
+		pList pPre = pHead;
+		pList pCur = pPre->next;
+		pList pTail = NULL;
+		while (pTail != pHead->next)
+		{
+			while (pCur != pTail)
+			{
+				if (pPre->data > pCur->data)
+				{
+					DataType tmp = pPre->data;
+					pPre->data = pCur->data;
+					pCur->data = tmp;
+				}
+				pPre = pCur;
+				pCur = pCur->next;
+			}
+			pTail = pPre;
+			pPre = pHead;
+			pCur = pPre->next;
+		}
+	}
+}
+
+pList FindMidNode(pList pHead)
+{
+	if (NULL == pHead)
+	{
+		return pHead;
+	}
+	pList FastNode = pHead;
+	pList SlowNode = pHead;
+	while (FastNode && FastNode->next)
+	{
+		FastNode = FastNode->next->next;
+		SlowNode = SlowNode->next;
+	}
+	return SlowNode;
+}
+
+pList FindLastKNode(pList pHead, size_t K)
+{
+	if (NULL == pHead || 0 == K)
+	{
+		return NULL;
+	}
+	pList FastNode = pHead;
+	pList SlowNode = pHead;
+	while (K--)
+	{
+		if (NULL == FastNode)
+			return NULL;
+		FastNode = FastNode->next;
+	}
+	while (FastNode)
+	{
+		FastNode = FastNode->next;
+		SlowNode = SlowNode->next;
+	}
+	return SlowNode;
+}
+
+pList MergeList(pList pHead1, pList pHead2)
+
+	if (NULL == pHead1)
+	{
+		return pHead2;
+	}
+	if (NULL == pHead2)
+	{
+		return pHead1;
+	}
+	pList p1 = pHead1;
+	pList p2 = pHead2;
+	pList NewNode = NULL;
+	pList pTail = NULL;
+	if (p1->data > p2->data)
+	{
+		NewNode = p2;
+		pTail = p2;
+		p2 = p2->next;
+	}
+	else
+	{
+		NewNode = p1;
+		pTail = p1;
+		p1 = p1->next;
+	}
+	while (p1 && p2)
+	{
+		if (p1->data > p2->data)
+		{
+			pTail->next = p2;
+			p2 = p2->next;
+		}
+		else
+		{
+			pTail->next = p1;
+			p1 = p1->next;
+		}
+		pTail = pTail->next;
+	}
+	if (NULL == p1)
+	{
+		pTail->next = p2;
+	}
+	else
+	{
+		pTail->next = p1;
+	}
+	return NewNode;
+}
+
+//pList MergeList(pList pHead1, pList pHead2)
+//{
+//	if (NULL == pHead1)
+//	{
+//		return pHead2;
+//	}
+//	if (NULL == pHead2)
+//	{
+//		return pHead1;
+//	}
+//	pList p1 = pHead1;
+//	pList p2 = pHead2;
+//	pList NewNode = NULL;
+//	if (p1->data > p2->data)
+//	{
+//		NewNode = pHead2;
+//		p2 = p2->next;
+//		while (NULL != p1 && NULL != p2)
+//		{
+//			if (p1->data > p2->data)
+//			{
+//				p2 = p2->next;
+//			}
+//			else
+//			{
+//				pList pCur = p1->next;
+//				p1->next = p2->next;
+//				p2->next = p1;
+//				DataType tmp = p1->data;
+//				p1->data = p2->data;
+//				p2->data = tmp;
+//				p2 = p2->next;
+//				p1 = pCur;
+//			}
+//		}
+//		if (NULL == p2)
+//		{
+//			p2 = p1->next;
+//			return NewNode;
+//		}
+//		else
+//		{
+//			return NewNode;
+//		}
+//	}
+//	else
+//	{
+//		NewNode = pHead1;
+//		p1 = p1->next;
+//		while (NULL != p1 && NULL != p2)
+//		{
+//			if (p1->data < p2->data)
+//			{
+//				p1 = p1->next;
+//			}
+//			else
+//			{
+//				pList pCur = p2->next;
+//				p2->next = p1->next;
+//				p1->next = p2;
+//				DataType tmp = p1->data;
+//				p1->data = p2->data;
+//				p2->data = tmp;
+//				p2 = pCur;
+//				p1 = p1->next;
+//			}
+//		}
+//		if (NULL == p1)
+//		{
+//			p1 = p2->next;
+//			return NewNode;
+//		}
+//		else
+//		{
+//			return NewNode;
+//		}
+//	}
+//}
+
+pList HasCircle(pList pHead)
+{
+	if (NULL == pHead)
+	{
+		return NULL;
+	}
+	pList pFast = pHead;
+	pList pSlow = pHead;
+	while (pFast && pFast->next)
+	{
+		pFast = pFast->next->next;
+		pSlow = pSlow->next;
+		if (pSlow == pFast)
+		{
+			return pFast;
+		}
+	}
+	return NULL;
+}
+size_t GetCircleLen(pList pMeetNode)
+{
+	pList pCur = pMeetNode;
+	size_t count = 1;
+	if (pMeetNode)
+	{
+		while (pCur->next != pMeetNode)
+		{
+			count++;
+			pCur = pCur->next;
+		}
+		return count;
+	}
+	return 0;
+}
+pList GetEnterNode(pList pHead, pList pMeetNode)
+{
+	if (NULL == pHead || NULL == pMeetNode)
+	{
+		return NULL;
+	}
+	pList pH = pHead;
+	pList pM = pMeetNode;
+	while (pH != pM)
+	{
+		pH = pH->next;
+		pM = pM->next;
+	}
+	return pH;
+}
+
+int IsListCross(pList pHead1, pList pHead2)
+	if (NULL == pHead1 || NULL == pHead2)
+	{
+		return 0;
+	}
+	pList pH1 = Back(pHead1);
+	pList pH2 = Back(pHead2);
+	if (pH1 == pH2)
+		return 1;
+	return 0;
+}
+pList GetListCross(pList pHead1, pList pHead2)
+{
+	if (IsListCross(pHead1, pHead2))
+	{
+		size_t count1 = Size(pHead1);
+		size_t count2 = Size(pHead2);
+		pList pH1 = pHead1;
+		pList pH2 = pHead2;
+		int res = count1 - count2;
+		if (res > 0)
+		{
+			while (res--)
+				pH1 = pH1->next;
+		}
+		else
+		{
+			res = 0 - res;
+			while (res--)
+				pH2 = pH2->next;
+		}
+		while (pH1 != pH2)
+		{
+			pH1 = pH1->next;
+			pH2 = pH2->next;
+		}
+		return pH1;
+	}
+	return NULL;
+}
+
+int IsCircleListCross(pList pHead1, pList pHead2)
+{
+	if (NULL == pHead1 || NULL == pHead2)
+	{
+		return 0;
+	}
+	pList pMeetNode1 = HasCircle(pHead1);
+	pList pMeetNode2 = HasCircle(pHead2);
+	if (NULL == pMeetNode1 && NULL == pMeetNode2)
+	{
+		IsListCross(pHead1, pHead2);
+	}
+	else if (pMeetNode1 && pMeetNode2)
+	{
+		pList pCur = pMeetNode1;
+		while (pMeetNode1 != pCur->next)
+		{
+			if (pCur == pMeetNode2)
+			{
+				return 2;
+			}
+			pCur = pCur->next;
+		}
+		if (pCur == pMeetNode2)
+			return 2;
+	}
+	return 0;
+}
+pList GetCircleListCross(pList pHead1, pList pHead2)
+{
+	if (NULL == pHead1 || NULL == pHead2)
+		return NULL;
+	if (IsCircleListCross(pHead1, pHead2))
+	{
+		pList pEnterNode = GetEnterNode(pHead1, HasCircle(pHead1));
+		pList pCur = pEnterNode;
+		while (pCur->next != pEnterNode)
+		{
+			pCur = pCur->next;
+		}
+		pCur->next = pHead2;
+		pEnterNode = GetEnterNode(pHead1, HasCircle(pHead1));
+		return pEnterNode;
+	}
+	return NULL;
+}
+
+pList CopyComplexList(pList pHead）
+{
+	if (NULL == pHead)
+	{
+		return NULL;
+	}
+	pList pH = pHead;
+	pList NewNode = NULL;
+	while (pH)
+	{
+		NewNode = BuyNode(pH->data);
+		NewNode->next = pH->next;
+		pH->next = NewNode;
+		pH = pH->next->next;
+	}
+	pH = pHead;
+	while (pH)
+	{
+		if (NULL == pH->random)
+			pH->next->random = NULL;
+		else
+		{
+			pH->next->random = pH->random;
+		}
+		pH = pH->next->next;
+	}
+	pH = pHead;
+	pList pH1 = pH->next;
+	NewNode = pH1;
+	while (pH1->next)
+	{
+		pH->next = pH1->next;
+		pH1->next = pH->next->next;
+		pH = pH->next;
+		pH1 = pH1->next;
+	}
+	return NewNode;
+}
+
+void UnionSet(pList pHead1, pList pHead2)
+{
+	if (NULL == pHead1 || NULL == pHead2)
+	{
+		return;
+	}
+	pList pH1 = pHead1;
+	pList pH2 = pHead2;
+	while (pH1 && pH2)
+	{
+		if (pH1->data == pH2->data)
+		{
+			printf("%d  ",pH1->data);
+			pH1 = pH1->next;
+			pH2 = pH2->next;
+		}
+		else if (pH1->data > pH2->data)
+		{
+			pH2 = pH2->next;
+		}
+		else
+		{
+			pH1 = pH1->next;
+		}
+	}
+}
