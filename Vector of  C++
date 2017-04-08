@@ -3,7 +3,6 @@
 #include<assert.h>
 using namespace std;
 
-
 typedef int DataType;
 class Vector
 {
