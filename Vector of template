@@ -80,8 +80,6 @@ public:
 	{
 		return _end - _start;
 	}
-	//获取内存中最大能够为Vector分配多少元素的空间
-	SizeType MaxSize()const;
 	//判空
 	bool Empty()const
 	{
