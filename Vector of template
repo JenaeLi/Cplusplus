@@ -1,0 +1,274 @@
+#include<iostream>
+using namespace std;
+#include<assert.h>
+
+template<class T>
+class Vector
+{
+public:
+	typedef T ValueType;
+	typedef ValueType* Pointer;
+	typedef const ValueType* ConstPointer;
+	typedef ValueType* Iterator;
+	typedef const ValueType* ConstIterator;
+	typedef ValueType& Reference;
+	typedef const ValueType& ConstReference;
+	typedef size_t SizeType;
+
+
+public:
+	//默认构造函数
+	explicit Vector()
+		: _start(NULL)
+		, _end(NULL)
+		, _endOfStorage(NULL)
+	{}
+	//构造函数——有n个值为value的元素
+	explicit Vector(SizeType n, const T& value)
+	{
+		FillAndInit(n, value);
+	}
+	//构造函数——有n个值默认的元素
+	explicit Vector(SizeType n)
+	{
+		FillAndInit(n, T());
+	}
+	//拷贝构造函数
+	Vector(const Vector<T>& v)
+	{
+		_start = new ValueType[v.Capacity()];
+		_end = _start + v.Size();
+		_endOfStorage = _start + v.Capacity();
+		for (size_t i = 0; i < v.Size(); i++)
+		{
+			_start[i] = v._start[i];
+		}
+	}
+	//赋值运算符重载
+	Vector<T>& operator=(const Vector<T>& v)
+	{
+		if (this != &v)
+		{
+			Iterator tmp = new ValueType[v.Capacity()];
+			for (size_t i = 0; i < v.Size(); i++)
+			{
+				tmp[i] = v._start[i];
+			}
+			if (_start)
+			{
+				delete[]_start;
+			}
+			_start = tmp;
+			_end = _start + v.Size();
+			_endOfStorage = _start + v.Capacity();
+		}
+		return *this;
+	}
+	//析构函数
+	~Vector()
+	{
+		Clear();
+	}
+
+	//获取容量
+	SizeType Capacity()const
+	{
+		return _endOfStorage - _start;
+	}
+	//获取元素个数
+	SizeType Size()const
+	{
+		return _end - _start;
+	}
+	//获取内存中最大能够为Vector分配多少元素的空间
+	SizeType MaxSize()const;
+	//判空
+	bool Empty()const
+	{
+		return _start == _end;
+	}
+
+	//重载[]下标访问运算符
+	Reference operator[](size_t index)
+	{
+		assert(index < Size());
+		return _start[index];
+	}
+	ConstReference operator[](size_t index)const
+	{
+		assert(index < Size());
+		return _start[index];
+	}
+	//返回首元素的引用
+	Reference Front()
+	{
+		return _start;
+	}
+	ConstReference Front()const
+	{
+		return _start;
+	}
+	//返回尾元素的引用
+	Reference Back()
+	{
+		return --_end;
+	}
+	ConstReference Back()const
+	{
+		return --_end;
+	}
+
+	Iterator Begin()
+	{
+		return _start;
+	}
+	ConstIterator Begin()const
+	{
+		return _start;
+	}
+	Iterator End()
+	{
+		return _end;
+	}
+	ConstIterator End()const
+	{
+		return _end;
+	}
+
+	//尾插法
+	void PushBack(const T& value)
+	{
+		CheckCapacity();
+		*_end = value;
+		++_end;
+	}
+	//尾删
+	void PopBack()
+	{
+		--_end;
+	}
+
+	// 在position位置插入元素data
+	Iterator Insert(Iterator position, const T& data)
+	{
+		CheckCapacity();
+		for (Iterator tmp = _end; tmp > position;tmp--)
+		{
+			*tmp = *(tmp-1);
+		}
+		*position = data;
+		_end++;
+		return position;
+	}
+
+	// 删除position位置的元素
+	Iterator Erase(Iterator position)
+	{
+		for (; position < _end - 1; position++)
+			*position = *(position + 1);
+		_end--;
+		return position;
+	}
+	//清空
+	void Clear()
+	{
+		if (_start != _endOfStorage)
+		{
+			delete[] _start;
+			_start = NULL;
+			_end = NULL;
+			_endOfStorage = NULL;
+		}
+	}
+	//打印
+	void ValuePrint()
+	{
+		for (size_t i = 0; i < Size(); i++)
+		{
+			cout << _start[i] << ' ';
+		}
+		cout << endl;
+	}
+
+	friend std::ostream& operator<< <>(std::ostream& _cout, const Vector& v);
+protected:
+	void FillAndInit(SizeType n, const T& value)
+	{
+		_start = new ValueType[n];
+		_end = _start + n;
+		_endOfStorage = _end;
+		for (size_t i = 0; i < n; i++)
+		{
+			_start[i] = value;
+		}
+	}
+	void CheckCapacity()
+	{
+		if (Size() >= Capacity())
+		{
+			SizeType size = Size();
+			SizeType capacity = 1 + Capacity()*2;
+			Iterator tmp = new ValueType[capacity];
+			for (size_t i = 0; i < Size(); i++)
+			{
+				tmp[i] = _start[i];
+			}
+			if (_start)
+			{
+				delete[]_start;
+			}
+			_start = tmp;
+			_end = _start + size;
+			_endOfStorage = _start + capacity;
+		}
+	}
+private:
+	Iterator _start;
+	Iterator _end;
+	Iterator _endOfStorage;
+};
+
+template<typename T>
+std::ostream& operator<<(std::ostream& _cout, const Vector<T>& v)
+{
+	for (size_t i = 0; i < v.Size(); i++)
+	{
+		_cout << v._start[i] << ' ';
+	}
+	_cout << endl;
+	return _cout;
+}
+
+void FunTest1()
+{
+	Vector<int> v1;
+	Vector<int> v(3, 2);
+	Vector<int> v2(v);
+	v.PushBack(3);
+	v.PushBack(4);
+	v.PushBack(5);
+	v.PushBack(6);
+	v.PushBack(7);
+	v1 = v2;
+	v1 = v;
+	v1 = v2;
+	v.Insert(&v[0], 1);
+	v.Insert(&v[3], 1);
+	v.Insert(&v[9], 1);
+	v.Erase(&v[0]);
+	v.Erase(&v[3]);
+	v1.PushBack(1);
+	v1.PushBack(2);
+	v1.PushBack(3);
+	v1.PopBack();
+	v1.PopBack();
+	v1.PopBack();
+	v.ValuePrint();
+	cout << v << endl;
+}
+
+int main()
+{
+	FunTest1();
+	return 0;
+}
