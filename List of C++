@@ -1,0 +1,287 @@
+#pragma once
+#include<iostream>
+using namespace std;
+#include<assert.h>
+
+typedef int DataType;
+
+struct Node
+{
+	Node(const DataType& data);
+	DataType _data;
+	Node* _pNext;
+	Node* _pPre;
+};
+
+class List
+{
+public:
+	List();
+	List(size_t n, const DataType& data = DataType());
+	List(const List& l);
+	List& operator=(const List& l);
+	~List();
+	void PushBack(const DataType& data);
+	void PopBack();
+	void PushFront(const DataType& data);
+	void PopFront();
+	void Insert(Node* pos, const DataType& data);
+	void Erase(Node* pos);
+	void Assign(size_t n, const DataType data = DataType());
+	void Clear();
+	void PrintList();
+	Node& Front();
+	const Node& Front()const;
+	Node& Back();
+	const Node& Back()const;
+	Node& operator[](size_t index);
+	const Node& operator[](size_t index)const;
+	size_t Size()const;
+	bool Empty()const;
+private:
+	Node* _pHead;
+	Node* _pTail;
+	size_t _size;
+};
+
+
+
+
+
+
+#include"List.h"
+	Node::Node(const DataType& data)
+	: _data(data)
+	, _pNext(NULL)
+	, _pPre(NULL)
+	{}
+
+	List::List()
+		: _pHead(NULL)
+		, _pTail(NULL)
+		, _size(0)
+	{}
+	List::List(size_t n, const DataType& data)
+	{
+		while (n--)
+		{
+			PushBack(data);
+		}
+	}
+	List::List(const List& l)
+	{
+		Node* pNode = l._pHead;
+		while (pNode)
+		{
+			PushBack(pNode->_data);
+			pNode = pNode->_pNext;
+		}
+	}
+	List& List::operator=(const List& l)
+	{
+		if (this != &l)
+		{
+			if (_pHead)
+			{
+				Clear();
+			}
+			Node* pNode = l._pHead;
+			while (pNode)
+			{
+				PushBack(pNode->_data);
+				pNode = pNode->_pNext;
+			}
+		}
+		return *this;
+	}
+	List::~List()
+	{
+		Clear();
+	}
+
+	void List::PushBack(const DataType& data)
+	{
+		if (NULL == _pHead)
+		{
+			_pHead = _pTail = new Node(data);
+		}
+		else
+		{
+			Node* pNode = new Node(data);
+			_pTail->_pNext = pNode;
+			pNode->_pPre = _pTail;
+			_pTail = _pTail->_pNext;
+		}
+		++_size;
+	}
+	void List::PopBack()
+	{
+		if (_pHead == NULL)
+		{
+			return;
+		}
+		if (_pHead == _pTail)
+		{
+			delete _pHead;
+			_pHead = _pTail = NULL;
+		}
+		else
+		{
+			_pTail = _pTail->_pPre;
+			delete _pTail->_pNext;
+			_pTail->_pNext = NULL;
+		}
+		--_size;
+	}
+	void List::PushFront(const DataType& data)
+	{
+		if (NULL == _pHead)
+		{
+			_pHead = _pTail = new Node(data);
+		}
+		else
+		{
+			Node* pNode = new Node(data);
+			pNode->_pNext = _pHead;
+			_pHead->_pPre = pNode;
+			_pHead = pNode;
+		}
+		++_size;
+	}
+	void List::PopFront()
+	{
+		if (_pHead == NULL)
+		{
+			return;
+		}
+		if (_pHead == _pTail)
+		{
+			delete _pHead;
+			_pHead = _pTail = NULL;
+		}
+		else
+		{
+			_pHead = _pHead->_pNext;
+			delete _pHead->_pPre;
+			_pHead->_pPre = NULL;
+		}
+		--_size;
+	}
+	void List::Insert(Node* pos, const DataType& data)
+	{
+		if (Empty() || NULL == pos)
+		{
+			return;
+		}
+		if (pos == _pHead)
+		{
+			PushFront(data);
+		}
+		else
+		{
+			Node* pNode = new Node(data);
+			pNode->_pNext = pos;
+			pNode->_pPre = pos->_pPre;
+			pos->_pPre->_pNext = pNode;
+			pos->_pPre = pNode;
+			++_size;
+		}
+	}
+	void List::Erase(Node* pos)
+	{
+		if (Empty() || NULL == pos)
+		{
+			return;
+		}
+		if (pos == _pHead)
+		{
+			PopFront();
+		}
+		else if (pos == _pTail)
+		{
+			PopBack();
+		}
+		else
+		{
+			pos->_pPre->_pNext = pos->_pNext;
+			pos->_pNext->_pPre = pos->_pPre;
+			delete pos;
+			pos = NULL;
+			--_size;
+		}
+	}
+	void List::Assign(size_t n, const DataType data)
+	{
+		Clear();
+		for (size_t i = 0; i < n; i++)
+		{
+			PushBack(data);
+		}
+	}
+	void List::Clear()
+	{
+		Node* pNode = _pHead;
+		while (_pHead)
+		{
+			pNode = pNode->_pNext;
+			delete _pHead;
+			_pHead = pNode;
+		}
+		_pHead = NULL;
+		_pTail = NULL;
+		_size = 0;
+	}
+	void List::PrintList()
+	{
+		Node* pNode = _pHead;
+		while (pNode)
+		{
+			cout << pNode->_data << endl;
+			pNode = pNode->_pNext;
+		}
+	}
+	Node& List::Front()
+	{
+		return *_pHead;
+	}
+	const Node& List::Front()const
+	{
+		return *_pHead;
+	}
+	Node& List::Back()
+	{
+		return *_pTail;
+	}
+	const Node& List::Back()const
+	{
+		return *_pTail;
+	}
+	Node& List::operator[](size_t index)
+	{
+		assert(index < _size);
+		Node* pNode = _pHead;
+		for (size_t i = 0; i < index; i++)
+		{
+			pNode = pNode->_pNext;
+		}
+		return *pNode;
+	}
+	const Node& List::operator[](size_t index)const
+	{
+		assert(index < _size);
+		Node* pNode = _pHead;
+		for (size_t i = 0; i < index; i++)
+		{
+			pNode = pNode->_pNext;
+		}
+		return *pNode;
+	}
+	size_t List::Size()const
+	{
+		return _size;
+	}
+
+	bool List::Empty()const
+	{
+		return 0 == _size;
+	}
