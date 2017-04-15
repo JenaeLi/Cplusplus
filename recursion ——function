@@ -1,0 +1,310 @@
+#include<iostream>
+using namespace std;
+#include<assert.h>
+
+
+//定义节点
+struct Node
+{
+	Node(int data)
+	:_data(data)
+	, _next(NULL)
+	{}
+	int _data;
+	Node* _next;
+};
+
+//递归 —— 逆向打印无头单链表
+void PrintReverse(Node* pHead)
+{
+	//if (pHead)
+	//{
+	//	PrintReverse(pHead->_next);
+	//	cout << pHead->_data << "  ";
+	//}
+
+	if (pHead == NULL)
+	{
+		return;
+	}
+	PrintReverse(pHead->_next);
+	cout << pHead->_data << "  ";
+}
+
+void FunTest1()
+{
+	Node node1(1), node2(2), node3(3), node4(4);
+	node1._next = &node2;
+	node2._next = &node3;
+	node3._next = &node4;
+	PrintReverse(&node1);
+	cout << endl;
+}
+//递归——逆向销毁节点
+void DestroyReverse(Node*& pHead)
+{
+	if (pHead)
+	{
+		DestroyReverse(pHead->_next);
+		delete pHead;
+		pHead = NULL;
+	}
+}
+
+void FunTest2()
+{
+	Node* node1 = new Node(1);
+	Node* node2 = new Node(2);
+	Node* node3 = new Node(3);
+	Node* node4 = new Node(4);
+	node1->_next = node2;
+	node2->_next = node3;
+	node3->_next = node4;
+	PrintReverse(node1);
+	cout << endl;
+	DestroyReverse(node1);
+	PrintReverse(node1);
+	cout << endl;
+}
+//递归——逆向查找值为data的数据
+Node* FindReverse(Node* pHead, int data)
+{
+	if (pHead == NULL)
+		return NULL;
+	Node* res = FindReverse(pHead->_next, data);
+	if (res)
+		return res;
+	else
+	{
+		if (pHead->_data == data)
+			return pHead;
+	}
+	return NULL;
+}
+
+void FunTest3()
+{
+	Node* node1 = new Node(1);
+	Node* node2 = new Node(2);
+	Node* node3 = new Node(3);
+	Node* node4 = new Node(4);
+	node1->_next = node2;
+	node2->_next = node3;
+	node3->_next = node4;
+	Node* res = FindReverse(node1, 2);
+	res = FindReverse(node1, 3);
+	res = FindReverse(node1, 2);
+	res = FindReverse(node1, 1);
+}
+
+//二分查找
+//bool BinarySerach(int* arr, int left, int right, int data)
+//{
+//	if (data > arr[right] || data< arr[0])
+//		return false;
+//	int mid = (left&right) + ((left^right) >> 1);
+//	while (left <= right)
+//	{
+//
+//		if (data == arr[mid])
+//		{
+//			return true;
+//		}
+//		else if (data < arr[mid])
+//		{
+//			right = mid - 1;
+//		}
+//		else
+//		{
+//			left = mid + 1;
+//		}
+//		mid = (left&right) + ((left^right) >> 1);
+//	}
+//	return false;
+//}
+//递归——二分查找
+bool BinarySerach(int* arr, int left, int right, int data)
+{
+	if (data > arr[right] || data< arr[0])
+		return false;
+	if (left <= right)
+	{
+		int mid = (left&right) + ((left^right) >> 1);
+		if (data == arr[mid])
+		{
+			return true;
+		}
+		else if (data < arr[mid])
+		{
+			return BinarySerach(arr, left, mid - 1, data);
+		}
+		else
+		{
+			return BinarySerach(arr, mid + 1, right, data);
+		}
+	}
+	return false;
+}
+
+//bool BinarySerach(int *arr, int left, int right, int data)
+//{
+//	if (left > right)//递归出口
+//	{
+//		return false;
+//	}
+//	int mid = (left & right) + ((left ^ right) >> 1);
+//	if (data > arr[mid])
+//	{
+//		BinarySerach(arr, mid + 1, right, data);
+//	}
+//	else if (data < arr[mid])
+//	{
+//		BinarySerach(arr, left, mid - 1, data);
+//	}
+//	else
+//	{
+//		return true;
+//	}
+//}
+
+void FunTest4()
+{
+	int arr[] = { 1, 2, 3, 4, 6, 6, 7, 8, 9 };
+	cout << BinarySerach(arr, 0, sizeof(arr) / sizeof(arr[0]) - 1, 2) << endl;
+	cout << BinarySerach(arr, 0, sizeof(arr) / sizeof(arr[0]) - 1, 5) << endl;
+	cout << BinarySerach(arr, 0, sizeof(arr) / sizeof(arr[0]) - 1, 1) << endl;
+	cout << BinarySerach(arr, 0, sizeof(arr) / sizeof(arr[0]) - 1, 3) << endl;
+	cout << BinarySerach(arr, 0, sizeof(arr) / sizeof(arr[0]) - 1, 4) << endl;
+	cout << BinarySerach(arr, 0, sizeof(arr) / sizeof(arr[0]) - 1, 9) << endl;
+	cout << BinarySerach(arr, 0, sizeof(arr) / sizeof(arr[0]) - 1, -1) << endl;
+	cout << BinarySerach(arr, 0, sizeof(arr) / sizeof(arr[0]) - 1, 14) << endl;
+}
+//递归——判断字符串是否回文
+//bool IsPalindereme(char* str, int len)
+//{
+//	assert(str);
+//	if (len <= 1)
+//		return true;
+//	if (*str == *(str+len-1))
+//	{
+//		int res = IsPalindereme(str + 1, len - 2);
+//		if (res)
+//			return true;
+//	}
+//	return false;
+//}
+
+bool IsPalindereme(char* str, int len)
+{
+	assert(str);
+	if (len <= 1)
+		return true;
+	if (*str == *(str + len - 1))
+	{
+		return IsPalindereme(str + 1, len - 2);
+	}
+	return false;
+}
+
+//尾递归——判断字符串是否回文
+//bool IsPalindereme(char* str, int len)
+//{
+//	assert(str);
+//	if (len <= 1)
+//		return true;
+//	if (*str != *(str + len - 1))
+//		return false;
+//	return IsPalindereme(str + 1, len - 2);
+//}
+
+void FunTest5()
+{
+	char* str1 = "123454321";
+	char* str2= "12344321";
+	char* str3 = "12354321";
+	char* str4 = "22354321";
+	cout << IsPalindereme(str1, strlen(str1)) << endl;
+	cout << IsPalindereme(str2, strlen(str2)) << endl;
+	cout << IsPalindereme(str3, strlen(str3)) << endl;
+}
+//递归——逆向打印数组
+void PrintReverseArr(int* arr, int len)
+{
+	//assert(arr);
+	//if (len)
+	//{
+	//	PrintReverseArr(arr + 1, len - 1);
+	//	cout << *(arr) << "  ";
+	//}
+
+	if (len)
+	{
+		cout << arr[len - 1] << "  ";
+		PrintReverseArr(arr, len - 1);
+	}
+}
+
+void FunTest6()
+{
+	int arr[] = { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+	PrintReverseArr(arr, sizeof(arr) / sizeof(arr[0]));
+	cout << endl;
+}
+
+//尾递归——斐波那契数列
+//1 1 2 3 5 8 13 21 34 55
+int fib(int first, int second, int N)
+{
+	if (N < 3)
+		return 1;
+	if (N == 3)
+		return first + second;
+	fib(second, first + second, N - 1);
+}
+
+void FunTest7()
+{
+	cout<<fib(1, 1, 10)<<endl;
+}
+
+void Perm(int* arr, int len, int N)
+{
+	if (len == N)
+	{
+		for (int i = 0; i < len; i++)
+		{
+			cout << arr[i] << "  ";
+		}
+		cout << endl;
+	}
+	else
+	{
+		for (int i = 0; i < N; i++)
+		{
+			std::swap(arr[i], arr[N]);
+			Perm(arr, len, N + 1);
+			std::swap(arr[i], arr[N]);
+		}
+	}
+	//return Perm();
+}
+
+void FunTest8()
+{
+	int arr[] = { 1, 2, 3, 4, 5 };
+	Perm(arr, 5, 4);
+}
+
+int main()
+{
+	FunTest8();
+	//FunTest7();
+	//FunTest6();
+	//FunTest5();
+	//FunTest4();
+	//FunTest3();
+	//FunTest2();
+	//FunTest1();
+	system("pause");
+	return 0;
+}
