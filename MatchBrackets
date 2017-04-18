@@ -1,0 +1,61 @@
+#include<iostream>
+using namespace std;
+#include<assert.h>
+
+bool MatchBrackets(char * str, int len)
+{
+	assert(str);
+	assert(len > 0);
+	Stack<int> s;
+	for (int i = 0; i < len; i++)
+	{
+		if (!(str[i] == '(' || str[i] == '[' || str[i] == '{' ||
+			str[i] == ')' || str[i] == ']' || str[i] == '}'))
+			continue;
+		else if (str[i] == '(' || str[i] == '[' || str[i] == '{')
+			s.Push(str[i]);
+		else if (str[i] == ')'&& s.Top() == '(' ||
+			str[i] == ']'&&s.Top() == '[' ||
+			str[i] == '}'&&s.Top() == '{')
+			s.Pop();
+		else if (s.Empty())
+		{
+			cout << "右括号多" << endl;
+			return false;
+		}
+		else
+		{
+			cout << "括号不匹配" << endl;
+			return false;
+		}
+	}
+	if (s.Empty())
+	{
+		cout << "perfect!" << endl;
+		return true;
+	}
+	else
+	{
+		cout << "左括号多" << endl;
+		return false;
+	}
+}
+
+void FunTest2()
+{
+	char a[] = "(())abc{[(])}"; // 左右括号次序匹配不正确
+	char b[] = "(()))abc{[]}"; // 右括号多于左括号
+	char c[] = "(()()abc{[]}"; // 左括号多于右括号
+	char d[] = "(())abc{[]()}"; // 左右括号匹配正确
+	cout << MatchBrackets(a, strlen(a)) <<endl;
+	cout << MatchBrackets(b, strlen(b)) << endl;
+	cout << MatchBrackets(c, strlen(c)) << endl;
+	cout << MatchBrackets(d, strlen(d)) << endl;
+}
+
+int main()
+{
+	FunTest2();
+	system("pause");
+	return 0;
+}
