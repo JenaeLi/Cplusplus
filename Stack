@@ -1,0 +1,144 @@
+#include<iostream>
+using namespace std;
+#include<assert.h>
+
+template<typename T>
+class Stack
+{
+public:
+	Stack(size_t capacity = 10)
+		: _capacity(capacity)
+		, _size(0)
+	{
+		_pData = new T[_capacity];
+	}
+
+	Stack(const Stack<T>& s)
+	{
+		_pData = new T[s._capacity];
+		for (size_t i = 0; i < s._size; i++)
+		{
+			_pData[i] = s._pData[i];
+		}
+		_capacity = s._capacity;
+		_size = s._size;
+	}
+
+	Stack<T>& operator=(const Stack<T>& s)
+	{
+		if (this != &s)
+		{
+			T* tmp = new T[s._capacity];
+			for (size_t i = 0; i < s._size; i++)
+			{
+				tmp[i] = s._pData[i];
+			}
+			delete _pData;
+			_pData = tmp;
+			_capacity = s._capacity;
+			_size = s._size;
+		}
+		return *this;
+	}
+
+	bool Empty()const
+	{
+		return 0 == _size;
+	}
+
+	size_t Size()const
+	{
+		return _size;
+	}
+
+	T& Top()
+	{
+		return _pData[_size - 1];
+	}
+
+	const T& Top()const
+	{
+		return _pData[_size - 1];
+	}
+
+	void Push(const T& s)
+	{
+		CheckCapacity();
+		_pData[_size++] = s;
+	}
+
+	void Pop()
+	{
+		if (!Empty())
+		{
+			--_size;
+		}
+	}
+
+	void PrintStack()
+	{ 
+		if (!Empty())
+		{ 
+			for (size_t i = 0; i < _size; i++)
+			{
+				cout << _pData[i] << "  ";
+			}
+			cout << endl;
+		}
+	}
+
+protected:
+	void CheckCapacity()
+	{
+		if (_size >= _capacity)
+		{
+			T* tmp = new T[_capacity*2+1];
+			for (size_t i = 0; i < _size; i++)
+			{
+				tmp[i] = _pData[i];
+			}
+			delete[]_pData;
+			_pData = tmp;
+			_capacity = _capacity *  2 + 1;
+		}
+	}
+
+private:
+	T* _pData;
+	size_t _capacity;
+	size_t _size;
+};
+
+void FunTest1()
+{
+	Stack<int> s(0);
+	Stack<int> s1(s);
+	s1.PrintStack();
+	s.Push(1);
+	s.Push(2);
+	s.Push(3);
+	s.Push(4);
+	Stack<int> s2(s);
+	s1 = s2;
+	s1.PrintStack();
+	//s.PrintStack();
+	cout<<s.Empty()<<endl;
+	s.Pop();
+	s.PrintStack();
+	cout<<s.Size()<<endl;
+	cout<<s.Top()<<endl;
+	s.Pop();
+	s.Pop();
+	s.Pop();
+	cout<<s.Empty()<<endl;
+	s.PrintStack();
+	s1 = s;
+	s1.PrintStack();
+}
+
+int main()
+{
+	FunTest1();
+	system("pause");
+	return 0;
+}
