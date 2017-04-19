@@ -1,0 +1,266 @@
+#include<iostream>
+using namespace std;
+
+template<class T>
+struct ListNode //新建链表节点
+{
+	ListNode(const T& x = T())
+	: _prev(NULL)
+	, _next(NULL)
+	, _value(x)
+	{}
+
+	ListNode<T>* _prev;
+	ListNode<T>* _next;
+	T _value;
+};
+
+template<class T, class Ref, class Ptr>
+struct __ListIterator__  // 迭代器
+{
+	typedef __ListIterator__<T, T&, T*> Iterator;
+	typedef __ListIterator__<const T, const T&, const T*> ConstItrator;
+	typedef __ListIterator__<T, Ref, Ptr> Self;
+	typedef T ValueType;
+	typedef Ref Reference;
+	typedef Ptr Pointer;
+	typedef ListNode<T>* LinkType;
+	typedef size_t SizeType;
+
+	LinkType _node;
+
+	__ListIterator__(LinkType x)
+		:_node(x)
+	{}
+
+	__ListIterator__()
+		:_node(NULL)
+	{}
+	__ListIterator__(const Iterator& x)
+	{
+		_node = x._node;
+	}
+	bool operator==(const Iterator& x)
+	{
+		return _node == x._node;
+	}
+	bool operator!=(const Iterator& x)
+	{
+		return _node != x._node;
+	}
+	Reference operator*()
+	{
+		return _node->_value;
+	}
+	Pointer operator->()
+	{
+		return &(_node->_value);
+	}
+	Self& operator++()
+	{
+		_node = _node->_next;
+		return *this;
+	}
+	Self operator++(int)//后置++
+	{
+		Iterator tmp = *this;
+		++(*this);
+		return tmp;
+	}
+	Self& operator--()
+	{
+		_node = _node->_prev;
+		return *this;
+	}
+	Self operator--(int)
+	{
+		Iterator tmp = *this;
+		--(*this);
+		return tmp;
+	}
+
+};
+
+template<class T>
+class List
+{
+public:
+	typedef ListNode<T> Node;
+	typedef T ValueType;
+	typedef ValueType* Pointer;
+	typedef const ValueType* ConstPointer;
+	typedef ValueType& Reference;
+	typedef const ValueType& ConstReference;
+	typedef Node* LinkType;
+	typedef size_t SizeType;
+	typedef __ListIterator__<T, T&, T*> Iterator;
+	typedef __ListIterator__<const T, const T&, const T*> ConstIterator;
+
+
+	List()
+	{
+		_node = new Node;
+		_node->_next = _node;
+		_node->_prev = _node;
+	}
+	List(const List<T>& l)
+	{
+		_node = new Node;
+		_node->_next = _node;
+		_node->_prev = _node;
+		ConstIterator cit = l.Begin();
+		while (cit != l.End())
+		{
+			PushBack(*cit);
+			++cit;
+		}
+	}
+	List& operator=(const List& l)
+	{
+		Clear();
+		delete _node;
+		_node = new Node;
+		_node->_next = _node;
+		_node->_prev = _node;
+		ConstIterator cit = l.Begin();
+		while (cit != l.End())
+		{
+			PushBack(*cit);
+			++cit;
+		}
+	}
+	~List()
+	{
+		Clear();
+		Iterator it = End();
+		delete it._node;
+		it._node = NULL;
+	}
+	Iterator Begin()
+	{
+		return (Iterator)(_node->_next);
+	}
+	ConstIterator Begin()const
+	{
+		return (ConstIterator)(_node->_next);
+	}
+	Iterator End()
+	{
+		return (Iterator)_node;
+	}
+
+	ConstIterator End()const
+	{
+		return (ConstIterator)_node;
+	}
+	bool Empty()const
+	{
+		return _node == _node->_next;
+	}
+	SizeType Size()const
+	{
+		SizeType count = 0;
+		ConstIterator it = Begin();
+		while (it != End())
+		{
+			count++;
+			it++;
+		}
+		return count;
+	}
+	Reference Front()
+	{
+		return (*Begin());
+	}
+	ConstReference Front()const
+	{
+		return (*Begin());
+	}
+	Reference Back()
+	{
+		return *(--End());
+	}
+	ConstReference Back()const
+	{
+		return *(--End());
+	}
+	Iterator Insert(Iterator pos, const T& x)
+	{
+		LinkType tmp = new Node(x);
+		tmp->_next = pos._node;
+		tmp->_prev = pos._node->_prev;
+		pos._node->_prev->_next = tmp;
+		pos._node->_prev = tmp;
+		return tmp;
+	}
+	void PushFront(const T& x)
+	{
+		Insert(Begin(), x);
+	}
+	void PushBack(const T& x)
+	{
+		Insert(End(), x);
+	}
+	Iterator Erase(Iterator pos)
+	{
+		LinkType NextNode = pos._node->_next;
+		pos._node->_prev->_next = pos._node->_next;
+		pos._node->_next->_prev = pos._node->_prev;
+		delete pos._node;
+		pos._node = NULL;
+		return NextNode;
+	}
+	void PopFront()
+	{
+		Erase(Begin());
+	}
+	void PopBack()
+	{
+		Erase(--End());
+	}
+	void Clear()
+	{
+		Iterator it = Begin();
+		Iterator tmp = it;
+		while (tmp != End())
+		{
+			it++;
+			delete tmp._node;
+			tmp = it;
+		}
+		it._node->_next = it._node;
+		it._node->_prev = it._node;
+	}
+
+protected:
+	LinkType _node;
+};
+	
+void FunTest1()
+{
+	List<int> l1, l2;
+	l1.Insert(l1.Begin(), 1);
+	l1.PushFront(2);
+	l1.PushFront(3);
+	l1.PushFront(4);
+	l1.PushBack(5);
+
+	l2 = l1;
+	List<int> l3(l2);
+
+	l1.Erase(l1.Begin());
+	cout<<*(l1.End())<<endl;
+	l1.Front();
+	l1.PopBack();
+	l1.PopFront();
+	//l1.Size();
+	cout << l1.Empty() << endl;
+	l1.Clear();
+}
+
+int main()
+{
+	FunTest1();
+	system("pause");
+	return 0;
+}
