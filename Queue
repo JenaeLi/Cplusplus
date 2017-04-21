@@ -1,0 +1,90 @@
+#include<iostream>
+using namespace std;
+
+template <typename T>
+class Queue
+{
+public:
+	Queue(size_t capacity = 10)
+		: _capacity(capacity + 1)
+		, _front(0)
+		, _rear(0)
+		, _count(0)
+	{
+		_pData = new T[_capacity];
+	}
+	~Queue()
+	{
+		delete[] _pData;
+		_pData = NULL;
+		_capacity = 0;
+		_front = 0;
+		_rear = 0;
+		_count = 0;
+	}
+
+	void Push(const T& x)
+	{
+		if (IsFull())
+		{
+			return;
+		}
+		_pData[_rear] = x;
+		_rear = (_rear + 1) % _capacity;
+		_count++;
+	}
+
+	void Pop()
+	{
+		if (Empty())
+		{
+			return;
+		}
+		_front = (_front + 1) % _capacity;
+		_count--;
+	}
+	bool Empty()const
+	{
+		if (_count == 0)
+			return true;
+		return false;
+	}
+	size_t Size()
+	{
+		return _count;
+	}
+	T& Front()
+	{
+		return _pData[_front];
+	}
+
+	const T& Front()const
+	{
+		return _pData[_front];
+	}
+	T& Back()
+	{
+		return _pData[_rear - 1];
+	}
+
+	const T& Back()const
+	{
+		return _pData[_rear - 1];
+	}
+protected:
+	bool IsFull()
+	{
+		if (_count == _capacity)
+		{
+			cout << "Full queue" << endl;
+			return true;
+		}
+		return false;
+	}
+private:
+	T * _pData;
+	size_t _capacity;
+	size_t _front;
+	size_t _rear;
+	size_t _count;
+};
