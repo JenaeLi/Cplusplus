@@ -1,0 +1,64 @@
+#include<iostream>
+using namespace std;
+template <typename T>
+class SymmetricMatrix
+{
+public:
+	SymmetricMatrix(int* a, size_t N)
+		: _pData(new T[N*(N+1)/2])
+		, _row(N)
+		, _col(N)
+	{
+		size_t k = 0;
+		for (size_t i = 0; i < _row; i++)
+		{
+			for (size_t j = 0; j < _col; j++)
+			{
+				if (i >= j)
+					_pData[k++] = a[ i * _row + j];
+			}
+		}
+	}
+	T& Acess(int row, int col)
+	{
+		if (row < col)
+			std::swap(row, col);
+		return _pData[row*(row + 1) / 2 + col];
+	}
+	const T& Acess(int row, int col)const
+	{
+		if (row < col)
+			std::swap(row, col);
+		return _pData[row*(row + 1) / 2 + col];
+	}
+	~SymmetricMatrix()
+	{
+		if (_pData)
+		{
+			delete _pData;
+			_pData = NULL;
+			_row = _col = 0;
+		}
+	}
+	friend std::ostream& operator<<(std::ostream& _cout, const SymmetricMatrix<int>& s)
+	{
+		for (size_t i = 0; i < s._row; i++)
+		{
+			for (size_t j = 0; j < s._col; j++)
+			{
+				if (i < j)
+					_cout << s._pData[j*(j + 1) / 2 + i] << "  ";
+				else
+					_cout << s._pData[i*(i + 1) / 2 + j] << "  ";
+			}
+			_cout << endl;
+		}
+		_cout << endl;
+		return _cout;
+	}
+	
+private:
+	T* _pData;
+	size_t _row;
+	size_t _col;
+};
