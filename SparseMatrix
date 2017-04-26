@@ -1,0 +1,124 @@
+#include<iostream>
+using namespace std;
+#include<vector>
+
+template<typename T>
+class SparseMatrix
+{
+	template <typename T>
+	struct Trituple
+	{
+		Trituple(size_t row, size_t col, const T& data)
+			: _row(row)
+			, _col(col)
+			, _data(data)
+		{}
+		size_t _row;
+		size_t _col;
+		T _data;
+	};
+
+public:
+	SparseMatrix(T* arr, size_t row, size_t col, const T& invalid)
+		: _row(row)
+		, _col(col)
+		, _invalid(invalid)
+	{
+		for (size_t i = 0; i < _row; i++)
+		{
+			for (size_t j = 0; j < _col; j++)
+			{
+				if (arr[i*_col + j] != _invalid)
+				{
+					_sm.push_back(Trituple<T>(i, j, arr[i*_col + j]));
+				}
+			}
+		}
+	}
+
+	SparseMatrix()
+	{}
+
+	T& Access(size_t row, size_t col)
+	{
+
+
+		//for (size_t i = 0; i < _sm.size(); i++)
+		//{
+		//	if (_sm[i]._row > row || (_sm[i]._row == row && _sm[i]._col > col))
+		//		break;
+		//	if (_sm[i]._row == row && _sm[i]._col == col)
+		//		return _sm[i]._data;
+		//}
+		//return _invalid;
+
+
+
+		vector<Trituple<T>>::iterator it = _sm.begin();
+		while (it != _sm.end())
+		{
+			if (it->_row > row || (it->_row == row && it->_col > col))
+				break;
+			if (it->_row == row && it->_col == col)
+				return it->_data;
+			++it;
+		}
+		return _invalid;
+	}
+
+
+	template<class T>
+	friend ostream& operator<<(ostream& _cout, SparseMatrix<T>& sm)
+	{
+		size_t index = 0;
+		for (size_t i = 0; i < sm._row; i++)
+		{
+			for (size_t j = 0; j < sm._col; j++)
+			{
+				if (index < sm._sm.size() && sm._sm[index]._row == i && sm._sm[index]._col == j)
+				{
+					_cout << sm.Access(i, j) << "  ";
+					++index;
+				}
+				else 
+					_cout << sm._invalid << "  ";
+			}
+			_cout << endl;
+		}
+		return _cout;
+	}
+
+	SparseMatrix<T> Transprot()
+	{
+		SparseMatrix<T> sm;
+		sm._row = _col;
+		sm._col = _row;
+		sm._invalid = _invalid;
+		
+		for (size_t i = 0; i < _col; i++)
+		{
+			vector<Trituple<T>>::iterator it = _sm.begin();
+			while (it != _sm.end())
+			{
+				if (it->_col == i)
+					sm._sm.push_back(Trituple<T>(i, it->_row, it->_data));
+				++it;
+			}
+		}
+
+		//for (size_t i = 0; i < _sm.size(); i++)
+		//{
+		//	sm._sm.push_back(Trituple<T>(_sm[i]._col, _sm[i]._row, _sm[i]._data));
+		//}
+		return sm;
+	}
+
+	~SparseMatrix()
+	{}
+
+private:
+	vector<Trituple<T>> _sm;
+	size_t _row;
+	size_t _col;
+	T _invalid;
+};
