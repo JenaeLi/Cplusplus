@@ -1,6 +1,7 @@
 #include<iostream>
 using namespace std;
 #include<vector>
+#include<assert.h>
 
 template<typename T>
 class SparseMatrix
@@ -12,6 +13,8 @@ class SparseMatrix
 			: _row(row)
 			, _col(col)
 			, _data(data)
+		{}
+		Trituple()
 		{}
 		size_t _row;
 		size_t _col;
@@ -39,9 +42,10 @@ public:
 	SparseMatrix()
 	{}
 
+
 	T& Access(size_t row, size_t col)
 	{
-
+	
 
 		//for (size_t i = 0; i < _sm.size(); i++)
 		//{
@@ -88,6 +92,7 @@ public:
 		return _cout;
 	}
 
+
 	SparseMatrix<T> Transprot()
 	{
 		SparseMatrix<T> sm;
@@ -113,6 +118,94 @@ public:
 		return sm;
 	}
 
+	SparseMatrix<T> FastTransprot()
+	{
+		SparseMatrix<T> sm;
+		sm._row = _col;
+		sm._col = _row;
+		sm._invalid = _invalid;
+		sm._sm.resize(_sm.size());
+
+		int* RowCounts = new int[_col];
+		memset(RowCounts, 0, _col*sizeof(RowCounts[0]));
+		for (size_t i = 0; i < _sm.size(); i++)
+		{
+			RowCounts[_sm[i]._col]++;
+		}
+
+		int* RowStart = new int[_col];
+		memset(RowStart, 0, _col*sizeof(RowStart[0]));
+		for (size_t i = 0; i < _col - 1; i++)
+		{
+			RowStart[i+1] =RowStart[i] + RowCounts[i];
+		}
+
+		for (size_t i = 0; i < _sm.size(); i++)
+		{
+			int& index = RowStart[_sm[i]._col];
+			sm._sm[index] = Trituple<T>(_sm[i]._col, _sm[i]._row, _sm[i]._data);
+			index++;
+		}
+
+		delete[]RowCounts;
+		delete[]RowStart;
+		
+		return sm;
+	}
+
+	SparseMatrix<T> operator+(const SparseMatrix<T>& sm)
+	{
+		assert(this->_row == sm._row);
+		assert(this->_col == sm._col);
+		SparseMatrix<T> res;
+		res._row = _row;
+		res._col = _col;
+		res._invalid = _invalid;
+
+		vector<Trituple<T>>::iterator it1 = _sm.begin();
+		vector<Trituple<T>>::const_iterator it2 = sm._sm.begin();
+
+		while (it1 != _sm.end() && it2 != sm._sm.end())
+		{
+			if (it1->_row == it2->_row && it1->_col == it2->_col)
+			{
+				T value = it1->_data + it2->_data;
+				if (value != _invalid)
+					res._sm.push_back(Trituple<T>(it1->_row, it1->_col, value));
+				++it1;
+				++it2;
+			}
+			else if ((it1->_row > it2->_row) || ((it1->_row == it2->_row) && (it1->_col > it2->_col)))
+			{
+				res._sm.push_back(Trituple<T>(it2->_row, it2->_col, it2->_data));
+				++it2;
+			}
+			else
+			{
+				res._sm.push_back(Trituple<T>(it1->_row, it1->_col, it1->_data));
+				++it1;
+			}
+		}
+		if (it1 != _sm.end())
+		{
+			while (it1 != _sm.end())
+			{
+				res._sm.push_back(Trituple<T>(it1->_row, it1->_col, it1->_data));
+				++it1;
+			}
+		}
+		if (it2 != sm._sm.end())
+		{
+			while (it2 != sm._sm.end())
+			{
+				res._sm.push_back(Trituple<T>(it2->_row, it2->_col, it2->_data));
+				++it2;
+			}
+		}
+
+		return res;
+	}
+
 	~SparseMatrix()
 	{}
 
@@ -122,3 +215,41 @@ private:
 	size_t _col;
 	T _invalid;
 };
+
+void FunTest1()
+{
+	int array1[6][5] = {
+		{ 1, 0, 3, 0, 5 },
+		{ 0, 0, 0, 0, 0 },
+		{ 0, 0, 0, 0, 0 },
+		{ 1, 0, 3, 0, 5 },
+		{ 0, 0, 0, 0, 0 },
+		{ 0, 0, 0, 0, 0 } };
+	int array2[6][5] = {
+		{ 1, 0, -3, 0, 5 },
+		{ 0, 0, 0, 0, 0 },
+		{ 0, 2, 0, 0, 0 },
+		{ 1, 0, 3, 0, 5 },
+		{ 0, 0, 0, 0, 0 },
+		{ 0, 0, 0, 8, 0 } };
+	SparseMatrix<int> sm((int*)array1, 6, 5, 0);
+	SparseMatrix<int> sm1((int*)array2, 6, 5, 0);
+	cout<<sm.Access(0, 0)<<endl;
+	cout << sm.Access(2, 2) << endl;
+	cout << sm.Access(3, 3) << endl;
+	cout << sm.Access(3, 4) << endl;
+	cout << sm.Access(4, 4) << endl;
+	cout << sm << endl;
+	//cout << sm.FastTransprot() << endl;
+	cout << sm1 << endl;
+	sm1 =sm + sm1;
+	cout << sm1 << endl;
+
+}
+
+int main()
+{
+	FunTest1();
+	system("pause");
+	return 0;
+}
