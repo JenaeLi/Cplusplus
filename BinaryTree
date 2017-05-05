@@ -1,0 +1,330 @@
+#include<iostream>
+using namespace std;
+#include<queue>
+
+//前中后遍历非递归
+
+template<typename T>
+struct BinaryTreeNode
+{
+	BinaryTreeNode(const T& value)
+	: _left(NULL)
+	, _right(NULL)
+	, _value(value)
+	{}
+	BinaryTreeNode* _left;
+	BinaryTreeNode* _right;
+	T _value;
+};
+
+template<typename T>
+class BinaryTree
+{
+	typedef BinaryTreeNode<T> Node;
+
+public :
+
+	BinaryTree()
+		:_pRoot(NULL)
+	{}
+
+	BinaryTree(T* arr, size_t size, const T& invalid)
+	{
+		size_t index = 0;
+		CreateBinaryTree(_pRoot, arr, size, invalid, index);
+	}
+
+	BinaryTree(const BinaryTree<T>& b)
+	{
+		_pRoot = _CopyBinaryTree(b._pRoot);
+	}
+
+	BinaryTree<T>& operator=(const BinaryTree<T>& b)
+	{
+		if (this != &b)
+		{
+			if (_pRoot)
+				_DestroyBinaryTree(_pRoot);
+			_pRoot = _CopyBinaryTree(b._pRoot);
+		}
+		return *this;
+	}
+
+	~BinaryTree()
+	{
+		_DestroyBinaryTree(_pRoot);
+	}
+
+	Node* Find(const T& value)
+	{
+		return _Find(_pRoot, value);
+	}
+
+	Node* Parent(Node* pCur)
+	{
+		return _Parent(_pRoot, pCur);
+	}
+
+	Node* GetLeftChild(Node* pCur)
+	{
+		//return _GetLeftChild(_pRoot, pCur);
+		return (pCur == NULL) ? NULL : pCur->_left;
+	}
+	Node* GetRightChild(Node* pCur)
+	{
+		return (pCur == NULL) ? NULL : pCur->_right;
+	}
+
+	size_t Height()
+	{
+		return _Height(_pRoot);
+	}
+	size_t GetLeefCount()
+	{
+		return _GetLeefCount(_pRoot);
+	}
+	size_t GetKLevelCount(size_t k)
+	{ 
+		return _GetKLevelCount(_pRoot, k);
+	}
+	void BinaryMirror()
+	{
+		_BinaryMirror(_pRoot);
+	}
+	void BinaryMirror_Nor()
+	{
+		if (_pRoot)
+		{
+			queue<Node*> q;
+			q.push(_pRoot);
+			while (!q.empty())
+			{
+				Node* pCur = q.front();
+				if (pCur->_left)
+					q.push(pCur->_left);
+				if (pCur->_right)
+					q.push(pCur->_right);
+				swap(pCur->_left, pCur->_right);
+				q.pop();
+			}
+		}
+	}
+
+	void PreOrder()
+	{
+		cout << "PreOrder:" << endl;
+		_PreOrder(_pRoot);
+		cout << endl;
+	}
+
+	void InOrder()
+	{
+		cout << "InOrder:" << endl;
+		_InOrder(_pRoot);
+		cout << endl;
+	}
+
+	void PostOrder()
+	{
+		cout << "PostOrder:" << endl;
+		_PostOrder(_pRoot);
+		cout << endl;
+	}
+
+	void LevelOrder()
+	{
+		cout << "LevelOrder:" << endl;
+		if (_pRoot)
+		{
+			queue<Node*> q;
+			q.push(_pRoot);
+			while (!q.empty())
+			{
+				Node* pCur = q.front();
+				cout << pCur->_value << "  ";
+				if (pCur->_left)
+					q.push(pCur->_left);
+				if (pCur->_right)
+					q.push(pCur->_right);
+				q.pop();
+			}
+		}
+		cout << endl;
+	}
+
+protected:
+
+	void CreateBinaryTree(Node* &pRoot, const T* arr, size_t size, const T& invalid, size_t& index)
+	{
+		if (index < size && arr[index] != invalid)
+		{
+			pRoot = new Node(*(arr + index));
+			CreateBinaryTree(pRoot->_left, arr, size, invalid, ++index);
+			CreateBinaryTree(pRoot->_right, arr, size, invalid, ++index);
+		}
+	}
+
+	Node* _CopyBinaryTree(Node* pRoot)
+	{
+		Node* pCur = NULL;
+		if (pRoot)
+		{
+			pCur = new Node(pRoot->_value);
+			pCur->_left = _CopyBinaryTree(pRoot->_left);
+			pCur->_right = _CopyBinaryTree(pRoot->_right);
+		}
+		return pCur;
+	}
+
+	Node* _Find(Node* pRoot, const T& value)
+	{
+		if (NULL == pRoot)
+			return NULL;
+		if (value == pRoot->_value)
+			return pRoot;
+		Node* pCur = _Find(pRoot->_left, value);
+		if (pCur)
+			return pCur;
+		return _Find(pRoot->_right, value);
+	}
+
+	Node* _Parent(Node* pRoot, Node* pCur)
+	{
+		if (NULL == pRoot || pRoot == pCur)
+			return NULL;
+		if (pRoot->_left == pCur)
+			return pRoot->_left;
+		if (pRoot->_right == pCur)
+			return pRoot->_right;
+		Node* par = _Parent(pRoot->_left, pCur);
+		if(par)
+			return par;
+		return _Parent(pRoot->_right, pCur);
+	}
+
+	Node* _GetLeftChild(Node* pRoot, Node* pCur)
+	{
+		if (NULL == pRoot)
+			return NULL;
+		if (pRoot == pCur && pRoot->_left)
+			return pRoot->_left;
+
+		Node* pLeftChild = _GetLeftChild(pRoot->_left, pCur);
+		if (pLeftChild)
+			return pLeftChild;
+		return _GetLeftChild(pRoot->_right, pCur);
+	}
+
+	size_t _Height(Node* pRoot)
+	{
+		if (pRoot == NULL)
+			return 0;
+		size_t DeepLeft1 = _Height(pRoot->_left);
+		size_t DeepLeft2 = _Height(pRoot->_right);
+		return (DeepLeft1 > DeepLeft2) ? DeepLeft1 + 1 : DeepLeft2 + 1;
+	}
+
+	size_t _GetLeefCount(Node* pRoot)
+	{
+		if (pRoot == NULL)
+			return 0;
+		if (pRoot->_left == NULL && NULL == pRoot->_right)
+			return 1;
+		return _GetLeefCount(pRoot->_left) + _GetLeefCount(pRoot->_right);
+	}
+
+	size_t _GetKLevelCount(Node* pRoot, size_t k)
+	{
+		if (pRoot == NULL || k < 1)
+			return 0;
+		if (k == 1)
+			return 1;
+		return _GetKLevelCount(pRoot->_left, k-1) + _GetKLevelCount(pRoot->_right, k-1);
+	}
+
+	Node* _BinaryMirror(Node* pRoot)
+	{
+		if (pRoot == NULL)
+			return NULL;
+		swap(pRoot->_left, pRoot->_right);
+		_BinaryMirror(pRoot->_left);
+		_BinaryMirror(pRoot->_right);
+	}
+
+	void _DestroyBinaryTree(Node* pRoot)
+	{
+		if (pRoot == NULL)
+			return;
+		_Destroy(pRoot->_left);
+		_Destroy(pRoot->_right);
+		delete pRoot;
+	}
+
+	void _PreOrder(Node* pRoot)
+	{
+		if (pRoot)
+		{
+			cout << pRoot->_value << "  ";
+			_PreOrder(pRoot->_left);
+			_PreOrder(pRoot->_right);
+		}
+	}
+
+	void _InOrder(Node* pRoot)
+	{
+		if (pRoot)
+		{
+			_InOrder(pRoot->_left);
+			cout << pRoot->_value << "  ";
+			_InOrder(pRoot->_right);
+		}
+	}
+
+	void _PostOrder(Node* pRoot)
+	{
+		if (pRoot)
+		{
+			_PostOrder(pRoot->_left);
+			_PostOrder(pRoot->_right);
+			cout << pRoot->_value << "  ";
+		}
+	}
+
+	
+
+private:
+	Node* _pRoot;
+};
+
+void FunTest()
+{
+	char* arr = "124###35##6";
+	char* arr1 = "123##4##5##6";
+	BinaryTree<char> t(arr, strlen(arr), '#');
+	t.PreOrder();
+	t.InOrder();
+	t.PostOrder();
+	t.LevelOrder();
+	cout<<t.Height()<<endl;
+
+	t.BinaryMirror_Nor();
+	t.LevelOrder();
+	cout << t.GetKLevelCount(2) << endl;
+	cout << t.GetKLevelCount(3) << endl;
+	cout<<t.GetLeefCount()<<endl;
+	t.GetLeftChild(t.Find((char)53));
+	t.GetRightChild(t.Find((char)51));
+	t.Find((char)55);
+	BinaryTree<char> t1(t);
+	BinaryTree<char> t2(arr1, strlen(arr), '#');
+	t2.PreOrder();
+	t2 = t1;
+	t2.PreOrder();
+}
+
+int main()
+{
+	FunTest();
+	system("pause");
+	return 0;
+}
