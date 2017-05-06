@@ -1,5 +1,6 @@
 #include<iostream>
 using namespace std;
+#include<stack>
 #include<queue>
 
 //前中后遍历非递归
@@ -117,6 +118,26 @@ public :
 		cout << endl;
 	}
 
+	void PreOrderNor()
+	{
+		if (_pRoot)
+		{
+			stack<Node*> s;
+			s.push(_pRoot);
+			while (!s.empty())
+			{
+				Node* pCur = s.top();
+				cout << pCur->_value << "  ";
+				s.pop();
+				if (pCur->_right)
+					s.push(pCur->_right);
+				if (pCur->_left)
+					s.push(pCur->_left);
+			}
+			cout << endl;
+		}
+	}
+
 	void InOrder()
 	{
 		cout << "InOrder:" << endl;
@@ -124,11 +145,69 @@ public :
 		cout << endl;
 	}
 
+	void InOrderNor()
+	{
+		if (_pRoot)
+		{
+			stack<Node*> s;
+			Node* pCur = _pRoot;
+			while (pCur || !s.empty())
+			{
+				while (pCur)
+				{
+					s.push(pCur);
+					pCur = pCur->_left;
+				}
+				pCur = s.top();
+				cout << pCur->_value << "  ";
+				s.pop();
+
+				while (pCur->_right == NULL && !s.empty())
+				{
+					pCur = s.top();
+					cout << pCur->_value << "  ";
+					s.pop();
+				}
+
+				pCur = pCur->_right;
+			}
+			cout << endl;
+		}
+	}
+
 	void PostOrder()
 	{
 		cout << "PostOrder:" << endl;
 		_PostOrder(_pRoot);
 		cout << endl;
+	}
+
+	void PostOrderNor()
+	{
+		if (_pRoot)
+		{
+			stack<Node*> s;
+			Node* pCur = _pRoot;
+			Node* Prev = NULL;
+			while (pCur || !s.empty())
+			{
+				while (pCur)
+				{
+					s.push(pCur);
+					pCur = pCur->_left;
+				}
+				Node* pTop = s.top();
+				if ((NULL == pTop->_right) || (pTop->_right == Prev))
+				{
+					cout << pTop->_value << "  ";
+					Prev = pTop;
+					s.pop();
+				}
+				else
+					pCur = pTop->_right;
+			}
+			cout << endl;
+		}
 	}
 
 	void LevelOrder()
@@ -290,8 +369,6 @@ protected:
 		}
 	}
 
-	
-
 private:
 	Node* _pRoot;
 };
@@ -302,8 +379,11 @@ void FunTest()
 	char* arr1 = "123##4##5##6";
 	BinaryTree<char> t(arr, strlen(arr), '#');
 	t.PreOrder();
+	t.PreOrderNor();
 	t.InOrder();
+	t.InOrderNor();
 	t.PostOrder();
+	t.PostOrderNor();
 	t.LevelOrder();
 	cout<<t.Height()<<endl;
 
