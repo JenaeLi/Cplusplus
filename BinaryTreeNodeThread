@@ -1,0 +1,363 @@
+#include<iostream>
+using namespace std;
+
+enum FlagPointer
+{
+	LINK,
+	THREAD
+};
+
+template <typename T>
+struct BinaryTreeNodeThread
+{
+	BinaryTreeNodeThread(const T& value)
+		: _Left(NULL)
+		, _Right(NULL)
+		, _value(value)
+		, _LeftType(LINK)
+		, _RightType(LINK)
+	{}
+
+	BinaryTreeNodeThread<T>* _Left;
+	BinaryTreeNodeThread<T>* _Right;
+	T _value;
+	FlagPointer _LeftType;
+	FlagPointer _RightType;
+};
+
+template<typename T>
+struct BinaryTreeIterator
+{
+	typedef BinaryTreeNodeThread<T> Node;
+	typedef BinaryTreeIterator<T> Self;
+	
+	BinaryTreeIterator(Node* node)
+		: _node(node)
+	{}
+	T& operator*()
+	{
+		return _node->_value;
+	}
+	T* operator->()
+	{
+		return &(_node->_value);
+	}
+	Self operator++()
+	{
+		if (_node->_RightType == THREAD)
+			_node = _node->_Right;
+		else
+		{
+			Node* right = _node->_Right;
+			while (right && right->_LeftType == LINK)
+			{
+				right = right->_Left;
+
+			}
+			_node = right;
+
+			//Node* left = _node->_Left;
+			//while (left->_LeftType == LINK)
+			//{
+			//	left = left->_Left;
+			//	_node = left;
+			//}
+		}
+		return *this;
+	}
+
+	bool operator!=(const Self& s)
+	{
+		return _node != s._node;
+	}
+	Node* _node;
+};
+
+template<typename T>
+class BinaryTreeThread
+{
+public:
+
+	typedef BinaryTreeNodeThread<T> Node;
+	typedef BinaryTreeIterator<T> Iterator;
+
+	BinaryTreeThread()
+		:_pRoot(NULL)
+	{}
+	BinaryTreeThread(const T* arr, size_t len, const T& invalid)
+	{
+		size_t index = 0;
+		_CreateBinaryTreeThread(_pRoot, arr, len, invalid, index);
+	}
+
+	~BinaryTreeThread()
+	{
+		_DestroyBinaryTree(_pRoot);
+	}
+
+	void PreThread()
+	{
+		Node* prev = NULL;
+		_PreThread(_pRoot, prev);
+	}
+
+
+	void InThread()
+	{
+		Node* prev = NULL;
+		_InThread(_pRoot, prev);
+	}
+
+
+	void PostThread()
+	{
+		Node* prev = NULL;
+		_PostThread(_pRoot, prev);
+	}
+
+	void PreOrder()
+	{
+		_PreOrder(_pRoot);
+		cout<<endl;
+	}
+
+	void PreOrderNor()
+	{
+		Node* pCur = _pRoot;
+		while (pCur)
+		{
+			cout << pCur->_value << "  ";
+			while (pCur && pCur->_LeftType == LINK)
+			{
+				pCur = pCur->_Left;
+				cout << pCur->_value << "  ";
+			}
+			pCur = pCur->_Right;
+		}
+		cout << endl;
+	}
+
+	void InOrder()
+	{
+		_InOrder(_pRoot);
+		cout << endl;
+	}
+
+	void InOrderNor()
+	{
+		Node* pCur = _pRoot;
+		while (pCur)
+		{
+			while (pCur->_LeftType == LINK)
+				pCur = pCur->_Left;
+			cout << pCur->_value << "  ";
+			while (pCur->_RightType == THREAD)
+			{
+				pCur = pCur->_Right;
+				cout << pCur->_value << "  ";
+			}
+			pCur = pCur->_Right;
+		}
+		cout << endl;
+	}
+
+	void PostOrder()
+	{
+		_PostOrder(_pRoot);
+		cout << endl;
+	}
+
+	//void PostOrderNor()
+	//{
+	//	Node* pCur = _pRoot;
+	//	Node* prev = NULL;
+	//	while (pCur)
+	//	{
+	//		if (prev != pCur->_Left)
+	//		{
+	//			while (pCur->_LeftType == LINK)
+	//				pCur = pCur->_Left;
+	//		}
+	//		while (pCur->_RightType == THREAD)
+	//		{
+	//			cout << pCur->_value << "  ";
+	//			prev = pCur;
+	//			pCur = pCur->_Right;
+	//		}
+	//		if (pCur == _pRoot && _pRoot->_Right == NULL)
+	//		{
+	//			cout << pCur->_value << "  ";
+	//			return;
+	//		}
+	//		while (pCur&&pCur->_Right == prev)
+	//		{
+	//			cout << pCur->_value << "  ";
+	//			prev = pCur;
+	//			pCur = pCur->_Parent;
+	//		}
+	//		if (pCur && LINK == pCur->_RightType)
+	//			pCur = pCur->_Right;
+	//	}
+	//}
+
+	Iterator Begin()
+	{
+		Node* pCur = _pRoot;
+		while (pCur->_LeftType == LINK)
+			pCur = pCur->_Left;
+		return Iterator(pCur);
+	}
+
+	Iterator End()
+	{
+		return NULL;
+	}
+
+
+protected:
+
+	void _PreOrder(Node* pRoot)
+	{
+		if (pRoot)
+			cout << pRoot->_value << "  ";
+		if (pRoot->_LeftType == LINK)
+			_PreOrder(pRoot->_Left);
+		if (pRoot->_RightType == LINK && pRoot->_Right)
+			_PreOrder(pRoot->_Right);
+	}
+
+	void _InOrder(Node* pRoot)
+	{
+		if (pRoot->_LeftType == LINK)
+			_InOrder(pRoot->_Left);
+		cout << pRoot->_value << "  ";
+		if (pRoot->_RightType == LINK && pRoot->_Right)
+			_InOrder(pRoot->_Right);
+	}
+
+	void _PostOrder(Node* pRoot)
+	{
+		if (pRoot->_LeftType == LINK)
+			_PostOrder(pRoot->_Left);
+		if (pRoot->_RightType == LINK)
+			_PostOrder(pRoot->_Right);
+		cout << pRoot->_value << "  ";
+	}
+
+	Node* _CreateBinaryTreeThread(Node*& pRoot, const T* arr, size_t len, const T& invalid, size_t& index)
+	{
+		if (index < len && arr[index] != invalid)
+		{
+			pRoot = new Node(arr[index]);
+			pRoot->_Left = _CreateBinaryTreeThread(pRoot->_Left, arr, len, invalid, ++index);
+			pRoot->_Right = _CreateBinaryTreeThread(pRoot->_Right, arr, len, invalid, ++index);
+		}
+		return pRoot;
+	}
+
+	void _DestroyBinaryTree(Node* pRoot)
+	{
+		if (pRoot == NULL)
+			return;
+		if (pRoot->_LeftType == LINK)
+			_DestroyBinaryTree(pRoot->_Left);
+		if (pRoot->_RightType == LINK)
+			_DestroyBinaryTree(pRoot->_Right);
+		delete pRoot;
+	}
+
+
+	void _PreThread(Node*& pRoot, Node*& prev)
+	{
+		if (pRoot == NULL)
+			return;
+		if (pRoot->_Left == NULL)
+		{
+			pRoot->_Left = prev;
+			pRoot->_LeftType = THREAD;
+		}
+		if (prev && prev->_Right == NULL)
+		{
+			prev->_Right = pRoot;
+			prev->_RightType = THREAD;
+		}
+		prev = pRoot;
+		if (pRoot->_LeftType == LINK)
+			_PreThread(pRoot->_Left, prev);
+		if (pRoot->_RightType == LINK)
+			_PreThread(pRoot->_Right, prev);
+	}
+
+	void _InThread(Node*& pRoot, Node*& prev)
+	{
+		if (pRoot == NULL)
+			return;
+		_InThread(pRoot->_Left, prev);
+		if (pRoot->_Left == NULL)
+		{
+			pRoot->_Left = prev;
+			pRoot->_LeftType = THREAD;
+		}
+		if (prev&& prev->_Right == NULL)
+		{
+			prev->_Right = pRoot;
+			prev->_RightType = THREAD;
+		}
+		prev = pRoot;
+		_InThread(pRoot->_Right, prev);
+	}
+
+	void _PostThread(Node*& pRoot, Node* &prev)
+	{
+		if (pRoot == NULL)
+			return;
+		_PostThread(pRoot->_Left, prev);
+		_PostThread(pRoot->_Right, prev);
+		if (pRoot->_Left == NULL)
+		{
+			pRoot->_Left = prev;
+			pRoot->_LeftType = THREAD;
+		}
+		if (prev&&prev->_Right == NULL)
+		{
+			prev->_Right = pRoot;
+			prev->_RightType = THREAD;
+		}
+		prev = pRoot;
+	}
+
+private:
+	Node* _pRoot;
+};
+
+void Test()
+{
+	char* arr = "124###35##6";
+	char* arr1 = "123##4##5##6";
+	BinaryTreeThread<char> btt(arr, strlen(arr), '#');
+	//btt.PreThread();
+	//btt.PreOrder();
+	//btt.PreOrderNor();
+
+	btt.InThread();
+	btt.InOrder();
+	btt.InOrderNor();
+
+	BinaryTreeThread<char>::Iterator it = btt.Begin();
+	while (it != btt.End())
+	{
+		cout << *it << "  ";
+		//cout << *(it.operator->()) << "  ";
+		++it;
+	}
+
+	//btt.PostThread();
+	//btt.PostOrder();
+}
+
+int main()
+{
+	Test();
+	system("pause");
+	return 0;
+}
