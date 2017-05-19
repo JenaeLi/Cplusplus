@@ -1,0 +1,119 @@
+#pragma once
+
+
+#include<iostream>
+using namespace std;
+#include<vector>
+#include<assert.h>
+
+template <typename T>
+struct Less
+{
+	bool operator()(const T& left, const T& right)
+	{
+		return left < right;
+	}
+};
+
+template <typename T>
+struct Greate
+{
+	bool operator()(const T& left, const T& right)
+	{
+		return left > right;
+	}
+};
+
+
+template <typename T, typename Compare = Less<T>>
+class Heap
+{
+public:
+	Heap()
+	{}
+	Heap(const T* arr, size_t size)
+	{
+		_heap.resize(size);
+		for (size_t i = 0; i < size; i++)
+			_heap[i] = arr[i];
+		int root = (_heap.size() - 2) / 2;
+		for (; root >= 0; --root)
+		{
+			_AdJustDown(root);
+		}
+	}
+
+	void Insert(const T& data)
+	{
+		_heap.push_back(data);
+		_AdJustUp();
+	}
+
+	void Remove()
+	{
+		assert(!_heap.empty());
+		size_t size = _heap.size();
+		_heap[0] = _heap[size - 1];
+		_heap.pop_back();
+		if (!_heap.empty())
+			_AdJustDown(0);
+	}
+
+	size_t Size()
+	{
+		return _heap.size();
+	}
+	bool Empty()
+	{
+		return _heap.empty();
+	}
+
+	~Heap()
+	{}
+
+	const T& Top()const
+	{
+		return _heap[0];
+	}
+
+protected:
+	void _AdJustDown(int parent)
+	{
+		int child = parent * 2 + 1;
+		int size = _heap.size();
+		Compare com;
+		while (child < size)
+		{
+			if (child + 1 < size && com(_heap[child+1], _heap[child]))
+				child += 1;
+			if (com(_heap[child], _heap[parent]))
+			{
+				swap(_heap[child], _heap[parent]);
+				parent = child;
+				child = parent * 2 + 1;
+			}
+			else
+				return;
+		}
+	}
+
+	void _AdJustUp()
+	{
+		int child = _heap.size() - 1;
+		int parent = (child - 1) >> 1;
+		while (child > 0)
+		{
+			if (Compare()(_heap[child], _heap[parent]))
+			{
+				swap(_heap[child], _heap[parent]);
+				child = parent;
+				parent = (child - 1) >> 1;
+			}
+			else
+				return;
+		}
+	}
+
+private:
+	vector<T> _heap;
+};
