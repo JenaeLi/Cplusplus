@@ -1,0 +1,208 @@
+#pragma once
+
+#include<iostream>
+using namespace std;
+
+template <typename K, typename V>
+struct AVLTreeNode
+{
+	AVLTreeNode(const K& key, const V& value)
+		: _left(NULL)
+		, _right(NULL)
+		, _parent(NULL)
+		, _key(key)
+		, _value(value)
+		, _bf(0)
+	{}
+	AVLTreeNode* _left;
+	AVLTreeNode* _right;
+	AVLTreeNode* _parent;
+	K _key;
+	V _value;
+	int _bf;
+};
+
+template <typename K, typename V>
+class AVLTree
+{
+public:
+	typedef AVLTreeNode<K, V> Node;
+
+	AVLTree()
+		:_pRoot(NULL)
+	{}
+
+	bool Insert(const K& key, const V& value)
+	{
+		if (NULL == _pRoot)
+		{
+			_pRoot = new Node(key, value);
+			return true;
+		}
+		Node* pCur = _pRoot;
+		Node* pParent = NULL;
+		while (pCur)
+		{
+			if (pCur->_key < key)
+			{
+				pParent = pCur;
+				pCur = pCur->_right;
+			}
+			else if (key < pCur->_key)
+			{
+				pParent = pCur;
+				pCur = pCur->_left;
+			}
+			else
+				return false;
+		}
+		pCur = new Node(key, value);
+		pCur->_parent = pParent;
+
+		while (pParent)
+		{
+			if (pCur == pParent->_left)
+				pParent->_bf++;
+			else
+				pParent->_bf--;
+			if (pParent->_bf == 0)
+				return true;
+			else if (pParent->_bf == 1 || pParent->_bf == -1)
+			{
+				pCur = pParent;
+				pParent = pParent->_parent;
+			}
+			else
+			{
+				if (pParent->_bf == 2)
+				{
+					if (pCur->_bf == 1)
+						_RotateLeft(pParent);
+					else
+						_RotateRL(pParent);
+				}
+				else if (pParent->_bf == -2)
+				{
+					if (pCur->_bf == -1)
+						_RotateRight(pParent);
+					else
+						_RotateLR(pParent);
+				}
+			}
+		}
+		return false;
+	}
+
+	void InOrder()
+	{
+		cout << "InOrder : " << endl;
+		_InOrder(_pRoot);
+		cout << endl;
+	}
+
+	size_t Height()
+	{
+		return _Height(_pRoot);
+	}
+
+	bool IsBalanceTree()
+	{
+		_IsBalanceTree(_pRoot);
+	}
+
+protected:
+
+	bool _IsBalanceTree(Node* pRoot)
+	{
+		if (NULL == pRoot)
+			return true;
+		int LeftHeight = _Height(pRoot->_left);
+		int RightHeight = _Height(pRoot->_right);
+		if (pRoot->_bf != RightHeight - LeftHeight && abs(pRoot->_bf) >= 2)
+			return false;
+		return _IsBalanceTree(pRoot->_left) && _IsBalance(pRoot->_right);
+	}
+
+	size_t _Height(Node* pRoot)
+	{
+		if (pRoot == NULL)
+			return 0;
+		if (pRoot->_left == NULL && pRoot->_right == NULL)
+			return 1;
+		size_t LeftHeight = _Height(pRoot->_left);
+		size_t RightHeight = _Height(pRoot->_right);
+		return (LeftHeight > RightHeight) ? LeftHeight + 1 : RightHeight + 1;
+	}
+
+	void _InOrder(Node* pRoot)
+	{
+		if (pRoot)
+		{
+			_InOrder(pRoot->_left);
+			cout << pRoot->_key << "  ";
+			_InOrder(pRoot->_right);
+		}
+	}
+
+	void _RotateLeft(Node* pParent)
+	{
+		Node* pSonR = pParent->_right;
+		Node* pSonRL = pSonR->_left;
+		pParent->_left = pSonRL;
+		if (pSonRL)
+			pSonRL->_parent = pParent;
+		pSonR->_left = pParent;
+		Node* pPParent = pParent->_parent;
+		pParent->_parent = pSonR;
+		pSonR->_parent = pPParent;
+		if (pPParent == NULL)
+			_pRoot = pSonR;
+		else
+		{
+			if (pPParent->_left == pParent)
+				pPParent->_left = pSonR;
+			else
+				pPParent->_right = pSonR;
+		}
+		pParent->_bf = pSonR->_bf = 0;
+	}
+
+	void _RotateRight(Node* pParent)
+	{
+		Node* pSonL = pParent->_left;
+		Node* pSonLR = pSonL->_right;
+		pSonLR->_parent = pParent;
+		pParent->_left = pSonLR;
+		pSonL->_right = pParent;
+		Node* pPParent = pParent->_parent;
+		pParent->_parent = pSonL;
+		pSonL->_parent = pPParent;
+		if (pPParent == NULL)
+			_pRoot = pSonL;
+		else
+		{
+			if (pPParent->_left == pParent)
+				pPParent->_left = pSonL;
+			else
+				pPParent->_right = pSonL;
+		}
+		pParent->_bf = pSonL->_bf = 0;
+	}
+
+	void _RotateLR(Node* pParent)
+	{
+		_RotateLeft(pParent->_left);
+		_RotateRight(pParent);
+	}
+	void _RotateRL(Node* pParent)
+	{
+		_RotateRight(pParent->_right);
+		_RotateLeft(pParent);
+	}
+
+private:
+	Node* _pRoot;
+};
+
+void Test()
+{}
