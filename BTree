@@ -1,0 +1,183 @@
+#include<iostream>
+using namespace std;
+
+template <typename K, size_t M>
+struct BTreeNode
+{
+	K _keys[M];
+	BTreeNode* _pSons[M + 1];
+	BTreeNode* _pParent;
+	size_t _size;
+	BTreeNode()
+		: _size(0)
+		, _pParent(NULL)
+	{
+		size_t i = 0;
+		for (i = 0; i < M; i++)
+			_pSons[i] = NULL;
+		_pSons[i] = NULL;
+	}
+};
+
+template <typename K, size_t M>
+class BTree
+{
+public:
+	typedef BTreeNode<K, M> Node;
+
+	BTree()
+		:_pRoot(NULL)
+	{}
+
+	pair<Node*, int> Find(const K& key)
+	{
+		Node* pCur = _pRoot;
+		Node* pParent = NULL;
+		while (pCur)
+		{
+			size_t i = 0;
+			while (i < pCur->_size)
+			{
+				if (key < pCur->_keys[i])
+					break;
+				else if (key > pCur->_keys[i])
+					i++;
+				else
+					return pair<Node*, int>(pCur, i);
+			}
+			pParent = pCur;
+			pCur = pCur->_pSons[i];
+		}
+		return pair<Node*, int>(pParent, -1);
+	}
+
+	bool Insert(const K& key)
+	{
+		if (_pRoot == NULL)
+		{
+			_pRoot = new Node;
+			_pRoot->_keys[0] = key;
+			_pRoot->_size = 1;
+			return true;
+		}
+
+		//找插入位置
+		pair<Node*, int> pos = Find(key);
+		if (pos.second >= 0)
+			return false;
+		//插入
+		Node* pCur = pos.first;
+		Node* pSon = NULL;
+		K k = key;
+		while (true)
+		{
+			InsertKey(pCur, pSon, k);
+			if (pCur->_size < M)
+				return true;
+			//分裂节点
+			size_t mid = pCur->_size >> 1;
+			Node* newNode = new Node;
+			//搬移mid右边
+			size_t i = 0;
+			for (i = mid+1; i < pCur->_size; i++)
+			{
+				newNode->_keys[newNode->_size] = pCur->_keys[i];
+				newNode->_pSons[newNode->_size++] = pCur->_pSons[i];
+				if (pCur->_pSons[i])
+					pCur->_pSons[i]->_pParent = newNode;
+			}
+			newNode->_pSons[newNode->_size] = pCur->_pSons[i];
+			if (pCur->_pSons[i])
+				pCur->_pSons[i]->_pParent = newNode;
+			pCur->_size = pCur->_size - newNode->_size - 1;
+			if (_pRoot == pCur)
+			{
+				_pRoot = new Node;
+				_pRoot->_keys[0] = pCur->_keys[mid];
+				_pRoot->_size = 1;
+				_pRoot->_pSons[0] = pCur;
+				pCur->_pParent = _pRoot;
+				_pRoot->_pSons[1] = newNode;
+				newNode->_pParent = _pRoot;
+				return true;
+			}
+			else
+			{
+				k = pCur->_keys[mid];
+				pCur = pCur->_pParent;
+				pSon = newNode;
+			}
+		}
+	}
+
+	void InOrder()
+	{
+		cout << "InOrder:" << endl;
+		_InOrder(_pRoot);
+		cout << endl;
+	}
+
+protected:
+
+	void _InOrder(Node* pRoot)
+	{
+		if (pRoot)
+		{
+			int i = 0;
+			for (; i < pRoot->_size; i++)
+			{
+				_InOrder(pRoot->_pSons[i]);
+				cout << pRoot->_keys[i] << " ";
+			}
+			_InOrder(pRoot->_pSons[pRoot->_size]);
+		}
+	}
+
+	void InsertKey(Node* pCur, Node* pSon, const K& key)
+	{
+		int end = pCur->_size - 1;
+		while (end >= 0)
+		{
+			if (pCur->_keys[end] > key)
+			{
+				pCur->_keys[end + 1] = pCur->_keys[end];
+				pCur->_pSons[end + 2] = pCur->_pSons[end + 1];
+			}
+			else
+				break;
+			end--;
+		}
+		pCur->_keys[end + 1] = key;
+		pCur->_pSons[end + 2] = pSon;
+		pCur->_size++;
+		if (pSon)
+			pSon->_pParent = pCur;
+	}
+
+private:
+	Node* _pRoot;
+};
+
+void Test()
+{
+	//BTree<int, 3> t;
+	//t.Insert(10);
+	//t.Insert(30);
+	//t.Insert(20);
+	//t.Insert(40);
+	//t.Insert(50);
+	//t.Insert(80);
+	//t.Insert(70);
+	//t.InOrder();
+
+
+	BTree<int, 3> t;
+	t.Insert(10);
+	t.Insert(30);
+	t.Insert(20);
+	t.Insert(40);
+	t.Insert(50);
+	t.Insert(38);
+	t.Insert(35);
+	t.InOrder();
+}
