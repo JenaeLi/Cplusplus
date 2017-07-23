@@ -1,0 +1,245 @@
+#include <iostream>
+using namespace std;
+
+#include <assert.h>
+#include <stack>
+namespace list
+{
+	typedef struct Node
+	{
+		int _data;
+		struct Node* _next;
+		Node(int data)
+			: _data(data)
+			, _next(NULL)
+		{}
+	}Node;
+
+	Node* MergeTwoList1(Node* pHead1, Node* pHead2)
+	{
+		if (pHead1 == NULL)
+			return pHead2;
+		if (pHead2 == NULL)
+			return pHead1;
+		Node* NewNode = NULL;
+		Node* p1 = pHead1;
+		Node* p2 = pHead2;
+		if (p1->_data > p2->_data)
+		{
+			NewNode = p2;
+			p2 = p2->_next;
+		}
+		else
+		{
+			NewNode = p1;
+			p1 = p1->_next;
+		}
+		Node* ptail = NewNode;
+		while (p1 && p2)
+		{
+			if (p1->_data > p2->_data)
+			{
+				ptail->_next = p2;
+				ptail = ptail->_next;
+				p2 = p2->_next;
+			}
+			else
+			{
+				ptail->_next = p1;
+				ptail = ptail->_next;
+				p1 = p1->_next;
+			}
+		}
+		if (p1)
+			ptail->_next = p1;
+		else
+			ptail->_next = p2;
+		return NewNode;
+	}
+	Node* MergeTwoList2(Node* pHead1, Node* pHead2
+	{
+		if (pHead1 == NULL)
+			return pHead2;
+		if (pHead2 == NULL)
+			return pHead1;		Node* p1 = pHead1;
+		Node* p2 = pHead2;
+		if (pHead1->_data < pHead2->_data)
+			p1 = pHead1, p2 = pHead2;
+		else			p1 = pHead2, p2 = pHead1;
+		Node* NewNode = p1;
+		Node* prev = NewNode;
+		p1 = p1->_next;
+		while (p1 && p2)
+		{
+			if (p1->_data > p2->_data)
+			{
+				Node* p2Next = p2->_next;
+				p2->_next = p1;
+				prev->_next = p2;
+				prev = p2;
+				p2 = p2Next;
+			}
+			else
+			{
+				prev = p1;
+				p1 = p1->_next;
+			}
+		}
+		return NewNode;
+	}
+
+	
+	Node* Reverse(Node* pHead)
+	{
+		if (pHead == NULL)
+			return NULL;
+		Node* pCur = pHead;
+		Node* pNext = pCur->_next;
+		Node* NewNode = NULL;
+		while (pNext)
+		{
+			pCur->_next = NewNode;
+			NewNode = pCur;
+			pCur = pNext;
+			pNext = pNext->_next;
+		}
+		pCur->_next = NewNode;
+		NewNode = pCur;
+		return NewNode;
+	}
+
+	void PrintList(Node* pHead)
+	{
+		if (pHead == NULL)
+			return;
+		PrintList(pHead->_next);
+		cout << pHead->_data << "  ";
+	}
+
+	Node* FindTailKNode(Node* pHead, int K)
+	{
+		assert(K > 0);
+		if (pHead == NULL)
+			return NULL;
+		Node* p1 = pHead;
+		Node* pK = pHead;
+		while (K-- && pK)
+		{
+			pK = pK->_next;
+		}
+		if (K <= 0)
+		{
+			while (pK)
+			{
+				p1 = p1->_next;
+				pK = pK->_next;
+			}
+			return p1;
+		}
+		return NULL;
+	}
+
+	void TestList()
+	{
+		Node* node1 = new Node(8);
+		Node* node2 = new Node(2);
+		Node* node3 = new Node(5);
+		Node* node4 = new Node(3);
+		Node* node5 = new Node(7);
+		Node* node6 = new Node(0);
+		Node* node7 = new Node(4);
+		node1->_next = node2;
+		node2->_next = node3;
+		node3->_next = node4;
+		node4->_next = node5;
+		node5->_next = node6;
+		node6->_next = node7;
+		cout << (FindTailKNode(node1, 1))->_data << endl;
+		cout << (FindTailKNode(node1, 4))->_data << endl;
+		cout << (FindTailKNode(node1, 7))->_data << endl;
+		FindTailKNode(node1, 9);
+
+		PrintList(node1);
+		cout << endl;
+		Node* newNode = Reverse(node1);
+		PrintList(newNode);
+		cout << endl;
+
+		//Node* nod1 = new Node(6);
+		//Node* nod2 = new Node(1);
+		//Node* nod3 = new Node(9);
+		//Node* nod4 = new Node(15);
+		//Node* nod5 = new Node(7);
+		//Node* nod6 = new Node(0);
+		//Node* nod7 = new Node(3);
+		//nod1->_next = nod2;
+		//nod2->_next = nod3;
+		//nod3->_next = nod4;
+		//nod4->_next = nod5;
+		//nod5->_next = nod6;
+		//nod6->_next = nod7;
+	}
+
+
+	//O(n)
+	bool IsCircle(Node* pHead)
+	{
+		if (pHead == NULL)
+			return false;
+		Node* Slow = pHead;
+		Node* Fast = pHead;
+		while (Fast&&Fast->_next)
+		{
+			Slow = Slow->_next;
+			Fast = Fast->_next->_next;
+			if (Slow == Fast)
+				return true;
+		}
+		return false;
+	}
+
+
+	//O(n)
+	Node* HasCircle(Node* pHead)
+	{
+		if (pHead == NULL)
+			return NULL;
+		Node* Slow = pHead;
+		Node* Fast = pHead;
+		while (Fast&&Fast->_next)
+		{
+			Slow = Slow->_next;
+			Fast = Fast->_next->_next;
+			if (Slow == Fast)
+				return Slow;
+		}
+		return NULL;
+	}
+	size_t CircleLength(Node* pHead)
+	{
+		Node* pCur = HasCircle(pHead);
+		if (pCur == NULL)
+			return 0;
+		size_t count = 1;
+		Node* pC = pCur;
+		while (pC->_next != pCur)
+		{
+			count++;
+			pC = pC->_next;
+		}
+		return count;
+	}
+
+	
+	// O(n)
+	Node* CircleNode(Node* pHead)
+	{
+		Node* pCur = HasCircle(pHead);
+		Node* pH = pHead;
+		while (pCur != pH)
+		{
+			pCur = pCur->_next;
+			pH = pH->_next;
+		}
+		return pCur;
+	}
